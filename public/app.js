@@ -439,11 +439,7 @@
     return "/data/shopee/shard-" + String(index + 1).padStart(2, "0") + ".json";
   });
 
-  async function loadShopeeExtra1000() {
-    var response = await fetch("/data/shopee/extra-1000.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("Falha ao carregar catálogo extra da Shopee");
-
-    var compact = await response.json();
+  function mapShopeeCompact(compact) {
     var categories = Array.isArray(compact.c) ? compact.c : [];
     var items = Array.isArray(compact.p) ? compact.p : [];
 
@@ -469,6 +465,58 @@
         origemSelecao: "SHOPEE_DATAFEED_OFICIAL_EXTRA"
       };
     });
+  }
+
+  async function gunzipShopeeParts() {
+    var urls = Array.from({ length: 16 }, function (_, index) {
+      return "/data/shopee/add1000-" + String(index + 1).padStart(2, "0") + ".txt";
+    });
+
+    var parts = await Promise.all(urls.map(function (url) {
+      return fetch(url, { cache: "no-store" }).then(function (response) {
+        if (!response.ok) throw new Error("Parte Shopee ausente");
+        return response.text();
+      });
+    }));
+
+    var base64 = parts.join("").replace(/\s+/g, "");
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+
+    for (var i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    if (window.pako && typeof window.pako.ungzip === "function") {
+      return JSON.parse(window.pako.ungzip(bytes, { to: "string" }));
+    }
+
+    if (typeof DecompressionStream !== "undefined") {
+      var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+      return JSON.parse(await new Response(stream).text());
+    }
+
+    throw new Error("Navegador sem suporte para descompactação");
+  }
+
+  async function loadShopeeExtra1000() {
+    try {
+      var response = await fetch("/data/shopee/extra-1000.json", { cache: "no-store" });
+      if (response.ok) {
+        var compact = await response.json();
+        if (Array.isArray(compact.p) && compact.p.length === 1000) {
+          return mapShopeeCompact(compact);
+        }
+      }
+    } catch (error) {}
+
+    var fallbackCompact = await gunzipShopeeParts();
+
+    if (!Array.isArray(fallbackCompact.p) || fallbackCompact.p.length !== 1000) {
+      throw new Error("Catálogo Shopee extra incompleto");
+    }
+
+    return mapShopeeCompact(fallbackCompact);
   }
 
   Promise.all([
