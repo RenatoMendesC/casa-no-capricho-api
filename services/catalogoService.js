@@ -5,7 +5,7 @@ const { obterTokens } = require("../config/tokenStore");
 
 const REVIEW_PATH = path.join(__dirname, "..", "data", "affiliate-review.json");
 const CATALOG_PATH = path.join(__dirname, "..", "public", "data", "products.json");
-const TARGET_TOTAL = 200;
+const TARGET_TOTAL = 181;
 const SOFT_CATEGORY_CAP = 30;
 
 const CATEGORIAS = [
@@ -173,6 +173,33 @@ async function gerarCatalogo200() {
       score: Math.max(Number(produto.score) || 0, 1000)
     });
     usados.add(produto.id);
+  }
+
+  if (preservados.length >= TARGET_TOTAL) {
+    const produtosFinais = preservados.slice(0, TARGET_TOTAL);
+    const payload = {
+      projeto: "Casa no Capricho",
+      marketplace: "Mercado Livre",
+      geradoEm: new Date().toISOString(),
+      criterio: "catálogo do Mercado Livre fechado com produtos afiliados aprovados",
+      quantidade: produtosFinais.length,
+      linksAtivos: produtosFinais.length,
+      pendentesAfiliado: 0,
+      rejeitadosConhecidos: rejeitados.size,
+      mercadoLivreFechado: true,
+      categorias: Object.fromEntries(
+        CATEGORIAS.map(c => [
+          c.categoria,
+          produtosFinais.filter(p => p.categoria === c.categoria).length
+        ])
+      ),
+      produtos: produtosFinais
+    };
+
+    const temporario = CATALOG_PATH + ".tmp";
+    await fs.writeFile(temporario, JSON.stringify(payload), "utf8");
+    await fs.rename(temporario, CATALOG_PATH);
+    return payload;
   }
 
   const buscas = CATEGORIAS.flatMap(config =>
