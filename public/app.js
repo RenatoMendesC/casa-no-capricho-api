@@ -439,31 +439,11 @@
     return "/data/shopee/shard-" + String(index + 1).padStart(2, "0") + ".json";
   });
 
-  var shopeeExtraPartUrls = Array.from({ length: 16 }, function (_, index) {
-    return "/data/shopee/add1000-" + String(index + 1).padStart(2, "0") + ".txt";
-  });
-
   async function loadShopeeExtra1000() {
-    if (typeof DecompressionStream === "undefined") return [];
+    var response = await fetch("/data/shopee/extra-1000.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Falha ao carregar catálogo extra da Shopee");
 
-    var parts = await Promise.all(shopeeExtraPartUrls.map(function (url) {
-      return fetch(url, { cache: "no-store" }).then(function (response) {
-        if (!response.ok) throw new Error("Falha ao carregar catálogo extra da Shopee");
-        return response.text();
-      });
-    }));
-
-    var base64 = parts.join("").replace(/\s+/g, "");
-    var binary = atob(base64);
-    var bytes = new Uint8Array(binary.length);
-
-    for (var i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-
-    var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-    var jsonText = await new Response(stream).text();
-    var compact = JSON.parse(jsonText);
+    var compact = await response.json();
     var categories = Array.isArray(compact.c) ? compact.c : [];
     var items = Array.isArray(compact.p) ? compact.p : [];
 
