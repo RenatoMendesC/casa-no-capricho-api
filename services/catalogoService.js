@@ -9,22 +9,23 @@ const TARGET_TOTAL = 200;
 const SOFT_CATEGORY_CAP = 30;
 
 const CATEGORIAS = [
-  { categoria: "Organização", termos: ["organizador gaveta", "organizador geladeira", "sapateira organizadora", "caixa organizadora", "organizador armario", "organizador cozinha", "cesto organizador", "prateleira organizadora"] },
-  { categoria: "Cozinha", termos: ["potes hermeticos cozinha", "porta temperos cozinha", "escorredor louca", "cortador legumes", "utensilios cozinha", "organizador cozinha", "escorredor talheres", "porta mantimentos"] },
-  { categoria: "Limpeza", termos: ["mop limpeza", "escova eletrica limpeza", "aspirador vertical casa", "limpa vidros", "rodo limpeza", "kit limpeza casa", "esfregao limpeza", "pano microfibra"] },
-  { categoria: "Banheiro", termos: ["prateleira banheiro", "organizador box banheiro", "porta escovas banheiro", "dispenser sabonete banheiro", "armario banheiro", "suporte banheiro", "porta toalha banheiro", "nicho banheiro"] },
-  { categoria: "Decoração", termos: ["espelho decorativo casa", "vaso decorativo casa", "almofada decorativa", "quadro decorativo casa", "tapete decorativo", "decoracao sala", "nicho decorativo", "centro mesa decorativo"] },
-  { categoria: "Quarto", termos: ["jogo de cama", "cabide veludo", "organizador roupas", "cortina blackout", "roupa de cama", "organizador guarda roupa", "caixa organizadora quarto", "colmeia organizadora"] },
-  { categoria: "Lavanderia", termos: ["varal retratil", "cesto roupa suja", "organizador lavanderia", "saco organizador vacuo", "prateleira lavanderia", "cesto lavanderia", "armario lavanderia", "varal parede"] },
-  { categoria: "Iluminação", termos: ["luz sensor movimento", "fita led casa", "luminaria sem fio", "abajur decorativo", "luminaria led", "luz noturna", "luminaria mesa", "spot led"] },
-  { categoria: "Utilidades", termos: ["seladora alimentos", "balanca digital cozinha", "umidificador aromatizador", "dispenser automatico", "mini ventilador", "organizador multiuso", "suporte multiuso", "dispenser cozinha"] },
-  { categoria: "Jardim", termos: ["vaso plantas decorativo", "kit jardinagem", "mangueira expansivel", "regador plantas", "suporte plantas", "jardim vertical", "vaso autoirrigavel", "ferramentas jardinagem"] }
+  { categoria: "Organização", termos: ["organizador gaveta", "organizador geladeira", "sapateira organizadora", "caixa organizadora", "organizador armario", "organizador cozinha", "cesto organizador", "prateleira organizadora", "colmeia organizadora", "organizador banheiro", "organizador despensa", "organizador acrilico"] },
+  { categoria: "Cozinha", termos: ["potes hermeticos cozinha", "porta temperos cozinha", "escorredor louca", "cortador legumes", "utensilios cozinha", "organizador cozinha", "escorredor talheres", "porta mantimentos", "tábua cozinha", "porta utensilios cozinha", "kit potes cozinha", "dispenser cereais"] },
+  { categoria: "Limpeza", termos: ["mop limpeza", "escova eletrica limpeza", "aspirador vertical casa", "limpa vidros", "rodo limpeza", "kit limpeza casa", "esfregao limpeza", "pano microfibra", "vassoura limpeza", "escova limpeza casa", "balde limpeza", "organizador produtos limpeza"] },
+  { categoria: "Banheiro", termos: ["prateleira banheiro", "organizador box banheiro", "porta escovas banheiro", "dispenser sabonete banheiro", "armario banheiro", "suporte banheiro", "porta toalha banheiro", "nicho banheiro", "kit banheiro", "tapete banheiro", "porta shampoo banheiro", "lixeira banheiro"] },
+  { categoria: "Decoração", termos: ["espelho decorativo casa", "vaso decorativo casa", "almofada decorativa", "quadro decorativo casa", "tapete decorativo", "decoracao sala", "nicho decorativo", "centro mesa decorativo", "bandeja decorativa", "porta retrato decorativo", "manta sofa", "enfeite sala"] },
+  { categoria: "Quarto", termos: ["jogo de cama", "cabide veludo", "organizador roupas", "cortina blackout", "roupa de cama", "organizador guarda roupa", "caixa organizadora quarto", "colmeia organizadora", "capa travesseiro", "protetor colchao", "sapateira quarto", "cabide organizador"] },
+  { categoria: "Lavanderia", termos: ["varal retratil", "cesto roupa suja", "organizador lavanderia", "saco organizador vacuo", "prateleira lavanderia", "cesto lavanderia", "armario lavanderia", "varal parede", "prendedor roupa", "capa maquina lavar", "saco lavar roupa", "cabide lavanderia"] },
+  { categoria: "Iluminação", termos: ["luz sensor movimento", "fita led casa", "luminaria sem fio", "abajur decorativo", "luminaria led", "luz noturna", "luminaria mesa", "spot led", "plafon led casa", "luminaria cozinha", "luminaria quarto", "luminaria parede"] },
+  { categoria: "Utilidades", termos: ["seladora alimentos", "balanca digital cozinha", "umidificador aromatizador", "dispenser automatico", "mini ventilador", "organizador multiuso", "suporte multiuso", "dispenser cozinha", "abridor multiuso", "suporte papel toalha", "porta sacolas", "dispenser detergente"] },
+  { categoria: "Jardim", termos: ["vaso plantas decorativo", "kit jardinagem", "mangueira expansivel", "regador plantas", "suporte plantas", "jardim vertical", "vaso autoirrigavel", "ferramentas jardinagem", "tesoura poda", "pa jardinagem", "suporte vaso plantas", "pulverizador plantas"] }
 ];
 
 const TERMOS_RUIDO = [
   "fantasia", "camiseta", "camisa", "adesivo automotivo", "automotiva", "carro", "moto",
   "festa infantil", "painel festa", "topo de bolo", "lembrancinha", "brinquedo", "drone",
-  "espada ninja", "samurai", "mamadeira"
+  "espada ninja", "samurai", "mamadeira", "moving spot", "empilhadeira", "puzzle",
+  "kit jardinagem infantil", "shampoo para veiculo"
 ];
 
 function headers() {
@@ -178,7 +179,7 @@ async function gerarCatalogo200() {
     config.termos.map(termo => ({ categoria: config.categoria, termo }))
   );
 
-  const respostas = await mapLimit(buscas, 10, async busca => ({
+  const respostas = await mapLimit(buscas, 12, async busca => ({
     ...busca,
     resultados: await pesquisarTermo(busca.termo)
   }));
