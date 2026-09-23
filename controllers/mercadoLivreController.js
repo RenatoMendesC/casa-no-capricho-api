@@ -1,16 +1,15 @@
 ﻿const {
   gerarUrlAutorizacao,
   trocarCodePorToken,
-  buscarProdutos
+  consultarMinhaConta,
+  consultarProduto,
+  consultarProdutos
 } = require("../services/mercadoLivreService");
 
-const {
-  salvarTokens
-} = require("../config/tokenStore");
+const { salvarTokens } = require("../config/tokenStore");
 
 function login(req, res) {
-  const url = gerarUrlAutorizacao();
-  res.redirect(url);
+  res.redirect(gerarUrlAutorizacao());
 }
 
 async function callback(req, res) {
@@ -27,59 +26,65 @@ async function callback(req, res) {
 
     salvarTokens(tokens);
 
-    console.log("Mercado Livre conectado.");
-    console.log("User ID:", tokens.user_id);
-
     res.send(`
       <h1>Casa no Capricho</h1>
       <h2>Mercado Livre conectado com sucesso!</h2>
       <p>User ID: ${tokens.user_id}</p>
-      <p>Já podemos começar a integrar os produtos.</p>
     `);
 
   } catch (error) {
-    console.error(
-      error.response?.data ||
-      error.message
-    );
-
     res.status(500).json({
-      erro: "Erro ao autenticar com Mercado Livre",
-      detalhes:
-        error.response?.data ||
-        error.message
+      erro: error.response?.data || error.message
     });
   }
 }
 
-async function buscar(req, res) {
+async function me(req, res) {
   try {
-    const termo = req.query.q;
+    res.json(await consultarMinhaConta());
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      erro: error.response?.data || error.message
+    });
+  }
+}
 
-    if (!termo) {
+async function produto(req, res) {
+  try {
+    if (!req.query.id) {
       return res.status(400).json({
-        erro: "Informe uma busca. Exemplo: ?q=organizador"
+        erro: "Informe ?id=MLB..."
       });
     }
 
-    const produtos = await buscarProdutos(termo);
-
-    res.json({
-      busca: termo,
-      quantidade: produtos.length,
-      produtos
-    });
-
-  } catch (error) {
-    console.error(
-      error.response?.data ||
-      error.message
+    res.json(
+      await consultarProduto(
+        req.query.id.trim().toUpperCase()
+      )
     );
 
-    res.status(500).json({
-      erro:
-        error.response?.data ||
-        error.message
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      erro: error.response?.data || error.message
+    });
+  }
+}
+
+async function produtos(req, res) {
+  try {
+    if (!req.query.ids) {
+      return res.status(400).json({
+        erro: "Informe ?ids=MLB1,MLB2..."
+      });
+    }
+
+    res.json(
+      await consultarProdutos(req.query.ids)
+    );
+
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      erro: error.response?.data || error.message
     });
   }
 }
@@ -87,5 +92,7 @@ async function buscar(req, res) {
 module.exports = {
   login,
   callback,
-  buscar
+  me,
+  produto,
+  produtos
 };

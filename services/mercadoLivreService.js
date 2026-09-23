@@ -59,7 +59,6 @@ async function trocarCodePorToken(code, state) {
     params,
     {
       headers: {
-        accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded"
       }
     }
@@ -70,40 +69,92 @@ async function trocarCodePorToken(code, state) {
   return response.data;
 }
 
-async function buscarProdutos(termo) {
+function getAuthHeaders() {
   const tokens = obterTokens();
 
   if (!tokens?.access_token) {
     throw new Error("Mercado Livre não está conectado.");
   }
 
+  return {
+    Authorization: `Bearer ${tokens.access_token}`
+  };
+}
+
+async function consultarMinhaConta() {
   const response = await axios.get(
-    "https://api.mercadolibre.com/sites/MLB/search",
+    "https://api.mercadolibre.com/users/me",
     {
-      params: {
-        q: termo,
-        limit: 20
-      },
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`
-      }
+      headers: getAuthHeaders()
     }
   );
 
-  return response.data.results.map((produto) => ({
-    id: produto.id,
-    nome: produto.title,
-    preco: produto.price,
-    imagem: produto.thumbnail
-      ? produto.thumbnail.replace("http://", "https://")
-      : null,
-    linkOriginal: produto.permalink,
-    categoria: produto.category_id
-  }));
+  return response.data;
+}
+
+async function consultarProduto(id) {
+  const response = await axios.get(
+    `https://api.mercadolibre.com/items/${id}`,
+    {
+      headers: getAuthHeaders()
+    }
+  );
+
+  const p = response.data;
+
+  return {
+    id: p.id,
+    nome: p.title,
+    preco: p.price,
+    moeda: p.currency_id,
+    categoria: p.category_id,
+    condicao: p.condition,
+    linkOriginal: p.permalink,
+    imagemPrincipal: p.pictures?.[0]?.secure_url || null,
+    imagens: (p.pictures || []).map(img => img.secure_url)
+  };
+}
+
+async function consultarProdutos(ids) {
+  const lista = ids
+    .split(",")
+    .map(id => id.trim().toUpperCase())
+    .filter(Boolean)
+    .slice(0, 50);
+
+  const response = await axios.get(
+    "https://api.mercadolibre.com/items/bulk",
+    {
+      params: {
+        ids: lista.join(",")
+      },
+      headers: getAuthHeaders()
+    }
+  );
+
+  return response.data.map(item => {
+    const p = item.body || {};
+
+    return {
+      status: item.status_code,
+      id: item.id || p.id,
+      nome: p.title || null,
+      preco: p.price ?? null,
+      moeda: p.currency_id || null,
+      categoria: p.category_id || null,
+      linkOriginal: p.permalink || null,
+      imagemPrincipal:
+        p.pictures?.[0]?.secure_url || null,
+      imagens:
+        (p.pictures || []).map(img => img.secure_url)
+    };
+  });
 }
 
 module.exports = {
   gerarUrlAutorizacao,
   trocarCodePorToken,
-  buscarProdutos
+  consultarMinhaConta,
+  consultarProduto,
+  consultarProdutos
 };
