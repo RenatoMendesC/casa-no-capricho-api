@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#718568">
+  <title>Casa no Capricho | Preparar links de afiliado</title>
+  <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body{background:#f7f3ec}
+    .tool-shell{padding:54px 0 80px}
+    .tool-card{background:#fff;border:1px solid #e7e1d8;border-radius:28px;padding:28px;box-shadow:0 18px 60px rgba(45,54,45,.08);margin-top:20px}
+    .tool-title{font-family:Georgia,serif;font-size:42px;line-height:1.04;margin:8px 0 12px;font-weight:500;letter-spacing:-.035em}
+    .tool-lead{max-width:780px;color:#6f786f;margin:0}
+    .step{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:22px 0;border-top:1px solid #eee9e1}
+    .step:first-of-type{border-top:0}
+    .step-number{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e8eee4;color:#52654c;font-weight:900}
+    .step h2{margin:2px 0 6px;font-size:18px}
+    .step p{margin:0;color:#6f786f}
+    .batch-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    .batch-btn,.action-btn{border:0;border-radius:999px;padding:11px 15px;background:#718568;color:white;font-weight:800;cursor:pointer}
+    .batch-btn:hover,.action-btn:hover{background:#52654c}
+    .batch-btn.done{background:#253128}
+    .secondary{background:#fff;color:#253128;border:1px solid #e7e1d8}
+    .secondary:hover{background:#f7f3ec}
+    .paste-area{width:100%;min-height:180px;margin-top:14px;border:1px solid #ddd6cb;border-radius:18px;padding:16px;resize:vertical;background:#fffdf9;color:#253128;outline:none}
+    .paste-area:focus{border-color:#718568;box-shadow:0 0 0 3px rgba(113,133,104,.12)}
+    .batch-select{height:44px;border:1px solid #ddd6cb;border-radius:999px;padding:0 14px;background:#fff;margin-top:14px}
+    .progress-wrap{margin-top:18px}
+    .progress-bar{height:10px;background:#ece7df;border-radius:999px;overflow:hidden}
+    .progress-fill{height:100%;width:0;background:#718568;transition:width .2s ease}
+    .progress-text{display:flex;justify-content:space-between;gap:12px;margin-top:8px;color:#6f786f;font-size:13px}
+    .message{margin-top:14px;padding:12px 14px;border-radius:14px;background:#e8eee4;color:#52654c;font-size:13px;display:none}
+    .message.error{background:#fff0ec;color:#934c36}
+    .url-preview{margin-top:14px;padding:14px;border-radius:14px;background:#f7f3ec;color:#6f786f;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;max-height:130px;overflow:auto;white-space:pre-wrap}
+    .tool-footer{margin-top:20px;color:#7a827a;font-size:12px;line-height:1.6}
+    @media(max-width:760px){.tool-title{font-size:34px}.tool-card{padding:20px}.step{grid-template-columns:1fr}.step-number{margin-bottom:-4px}.batch-btn,.action-btn{width:100%}.batch-select{width:100%}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">
+        <img src="/logo.svg" alt="" width="44" height="44">
+        <span class="brand-copy"><strong>Casa no Capricho</strong><small>central de afiliados</small></span>
+      </a>
+      <a class="header-cta" href="/">Voltar ao site</a>
+    </div>
+  </header>
+
+  <main class="tool-shell">
+    <div class="container">
+      <span class="section-kicker">Links em massa</span>
+      <h1 class="tool-title">Vamos colocar os links sem fazer 200 vezes.</h1>
+      <p class="tool-lead">Esta tela separa o catálogo em lotes de 50. Você copia cada lote para o Gerador de Links oficial do Mercado Livre, cola os links gerados de volta aqui e, no final, baixa um único arquivo pronto para eu subir no site.</p>
+
+      <section class="tool-card">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div>
+            <h2>Copie as URLs dos produtos</h2>
+            <p id="catalogStatus">Carregando catálogo...</p>
+            <div class="batch-row" id="copyButtons"></div>
+            <pre class="url-preview" id="urlPreview">Aguardando catálogo...</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div>
+            <h2>Gere os links no Portal de Afiliados do Mercado Livre</h2>
+            <p>No computador: Portal do Afiliado → Gerador de Links → cole um lote → Gerar → copie os links resultantes na mesma ordem.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div>
+            <h2>Cole o resultado do lote</h2>
+            <p>Escolha qual lote você gerou e cole um link por linha.</p>
+            <select class="batch-select" id="batchSelect" aria-label="Selecionar lote"></select>
+            <textarea class="paste-area" id="affiliatePaste" placeholder="Cole aqui os links de afiliado gerados pelo Mercado Livre, um por linha..."></textarea>
+            <div class="batch-row">
+              <button class="action-btn" id="saveBatchBtn" type="button">Salvar este lote</button>
+              <button class="action-btn secondary" id="clearBatchBtn" type="button">Limpar lote selecionado</button>
+            </div>
+            <div class="message" id="message"></div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <div>
+            <h2>Baixe o arquivo final</h2>
+            <p>Quando os lotes estiverem prontos, baixe o JSON e envie aqui no chat. Eu faço o restante no GitHub e no site.</p>
+            <div class="progress-wrap">
+              <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+              <div class="progress-text"><span id="progressText">0 links salvos</span><span id="progressPercent">0%</span></div>
+            </div>
+            <div class="batch-row">
+              <button class="action-btn" id="downloadBtn" type="button">Baixar arquivo de links</button>
+              <button class="action-btn secondary" id="resetBtn" type="button">Zerar tudo</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="tool-footer">Segurança: esta página não pede senha do Mercado Livre nem Client Secret. Os links ficam no armazenamento local do seu navegador até você baixar o arquivo.</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      "use strict";
+
+      var products = [];
+      var batchSize = 50;
+      var storageKey = "casaNoCaprichoAffiliateLinksV1";
+
+      function getSaved(){
+        try{return JSON.parse(localStorage.getItem(storageKey)||"{}");}
+        catch(e){return {};}
+      }
+
+      function setSaved(data){
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      }
+
+      function batchesCount(){
+        return Math.max(1, Math.ceil(products.length / batchSize));
+      }
+
+      function batchProducts(batchIndex){
+        var start = batchIndex * batchSize;
+        return products.slice(start, start + batchSize);
+      }
+
+      function productUrl(product){
+        return product.catalogUrl || ("https://www.mercadolivre.com.br/p/" + product.id);
+      }
+
+      function extractLinks(text){
+        return String(text || "")
+          .split(/\r?\n/)
+          .map(function(line){return line.trim();})
+          .filter(function(line){return /^https?:\/\//i.test(line);});
+      }
+
+      function showMessage(text, error){
+        var el = document.getElementById("message");
+        el.textContent = text;
+        el.className = "message" + (error ? " error" : "");
+        el.style.display = "block";
+      }
+
+      function renderBatchControls(){
+        var buttons = document.getElementById("copyButtons");
+        var select = document.getElementById("batchSelect");
+        buttons.innerHTML = "";
+        select.innerHTML = "";
+
+        for(var i=0;i<batchesCount();i++){
+          (function(index){
+            var batch = batchProducts(index);
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "batch-btn";
+            btn.textContent = "Copiar lote " + (index+1) + " (" + batch.length + ")";
+            btn.addEventListener("click", function(){
+              var text = batch.map(productUrl).join("\n");
+              navigator.clipboard.writeText(text).then(function(){
+                btn.classList.add("done");
+                btn.textContent = "Lote " + (index+1) + " copiado";
+                document.getElementById("urlPreview").textContent = text;
+                showMessage("Lote " + (index+1) + " copiado. Agora cole no Gerador de Links do Mercado Livre.");
+              }).catch(function(){
+                document.getElementById("urlPreview").textContent = text;
+                showMessage("Não consegui copiar automaticamente. As URLs estão no quadro abaixo.", true);
+              });
+            });
+            buttons.appendChild(btn);
+
+            var option = document.createElement("option");
+            option.value = String(index);
+            option.textContent = "Lote " + (index+1) + " — produtos " + (index*batchSize+1) + " a " + (index*batchSize+batch.length);
+            select.appendChild(option);
+          })(i);
+        }
+      }
+
+      function renderProgress(){
+        var saved = getSaved();
+        var total = products.length;
+        var count = products.filter(function(p){return Boolean(saved[p.id]);}).length;
+        var pct = total ? Math.round((count/total)*100) : 0;
+
+        document.getElementById("progressFill").style.width = pct + "%";
+        document.getElementById("progressText").textContent = count + " de " + total + " links salvos";
+        document.getElementById("progressPercent").textContent = pct + "%";
+      }
+
+      document.getElementById("saveBatchBtn").addEventListener("click", function(){
+        var batchIndex = Number(document.getElementById("batchSelect").value);
+        var batch = batchProducts(batchIndex);
+        var links = extractLinks(document.getElementById("affiliatePaste").value);
+
+        if(links.length !== batch.length){
+          showMessage("Este lote tem " + batch.length + " produtos, mas encontrei " + links.length + " links. Cole exatamente um link por produto, na mesma ordem.", true);
+          return;
+        }
+
+        var saved = getSaved();
+        batch.forEach(function(product, index){
+          saved[product.id] = links[index];
+        });
+        setSaved(saved);
+        document.getElementById("affiliatePaste").value = "";
+        renderProgress();
+        showMessage("Lote " + (batchIndex+1) + " salvo com " + links.length + " links.");
+      });
+
+      document.getElementById("clearBatchBtn").addEventListener("click", function(){
+        var batchIndex = Number(document.getElementById("batchSelect").value);
+        var saved = getSaved();
+        batchProducts(batchIndex).forEach(function(product){
+          delete saved[product.id];
+        });
+        setSaved(saved);
+        renderProgress();
+        showMessage("Lote " + (batchIndex+1) + " removido.");
+      });
+
+      document.getElementById("downloadBtn").addEventListener("click", function(){
+        var saved = getSaved();
+        var payload = {
+          projeto: "Casa no Capricho",
+          geradoEm: new Date().toISOString(),
+          quantidadeProdutos: products.length,
+          quantidadeLinks: products.filter(function(p){return Boolean(saved[p.id]);}).length,
+          links: products.map(function(product, index){
+            return {
+              ordem: index + 1,
+              id: product.id,
+              nome: product.nome,
+              categoria: product.categoria,
+              affiliateUrl: saved[product.id] || null
+            };
+          })
+        };
+
+        var blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "links-afiliados-casa-no-capricho.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        showMessage("Arquivo baixado. Agora envie esse JSON no chat para eu publicar os links.");
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", function(){
+        localStorage.removeItem(storageKey);
+        document.getElementById("affiliatePaste").value = "";
+        renderProgress();
+        showMessage("Links locais zerados.");
+      });
+
+      fetch("/data/products.json?ts=" + Date.now(), {cache:"no-store"})
+        .then(function(response){
+          if(!response.ok) throw new Error("Falha ao carregar catálogo");
+          return response.json();
+        })
+        .then(function(data){
+          products = Array.isArray(data.produtos) ? data.produtos : [];
+          document.getElementById("catalogStatus").textContent = products.length + " produtos carregados. Copie em lotes para gerar os links em massa.";
+          document.getElementById("urlPreview").textContent = products.slice(0, Math.min(8, products.length)).map(productUrl).join("\n") + (products.length > 8 ? "\n..." : "");
+          renderBatchControls();
+          renderProgress();
+        })
+        .catch(function(){
+          document.getElementById("catalogStatus").textContent = "Não consegui carregar o catálogo agora.";
+          showMessage("Atualize a página depois que o catálogo de produtos estiver disponível.", true);
+        });
+    })();
+  </script>
+</body>
+</html>
