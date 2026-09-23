@@ -47,7 +47,7 @@ const TERMOS_RUIDO = [
   "fantasia", "camiseta", "camisa", "adesivo automotivo", "automotiva", "carro", "moto",
   "festa infantil", "painel festa", "topo de bolo", "lembrancinha", "brinquedo", "drone",
   "espada ninja", "samurai", "mamadeira", "moving spot", "empilhadeira", "puzzle",
-  "kit jardinagem infantil", "shampoo para veiculo"
+  "kit jardinagem infantil", "shampoo para veiculo", "cabo forca", "cabo de forca", "porta teclado", "para computador"
 ];
 
 function headers() {
