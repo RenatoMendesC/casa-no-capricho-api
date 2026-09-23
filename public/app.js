@@ -58,18 +58,26 @@
     return chunks;
   }
 
-  async function hydrateMercadoLivrePrices() {
-    var missing = state.products.filter(function (product) {
-      return product.marketplace === "Mercado Livre" && (product.preco === null || product.preco === undefined);
+  async function hydrateMercadoLivrePrices(targetProducts) {
+    var source = Array.isArray(targetProducts) ? targetProducts : [];
+    var missing = source.filter(function (product) {
+      return product.marketplace === "Mercado Livre" &&
+        (product.preco === null || product.preco === undefined) &&
+        !product.precoCarregando &&
+        !product.precoConsultado;
     });
 
     if (!missing.length) return;
+
+    missing.forEach(function (product) {
+      product.precoCarregando = true;
+    });
 
     var byId = new Map(state.products.map(function (product) {
       return [product.id, product];
     }));
 
-    var chunks = chunkArray(missing.map(function (product) { return product.id; }), 30);
+    var chunks = chunkArray(missing.map(function (product) { return product.id; }), 10);
 
     for (var i = 0; i < chunks.length; i++) {
       try {
@@ -78,13 +86,23 @@
           { cache: "no-store" }
         );
 
-        if (!response.ok) continue;
+        if (!response.ok) {
+          chunks[i].forEach(function (id) {
+            var failed = byId.get(id);
+            if (failed) {
+              failed.precoCarregando = false;
+              failed.precoConsultado = true;
+            }
+          });
+          continue;
+        }
 
         var data = await response.json();
         (data.produtos || []).forEach(function (priceData) {
           var product = byId.get(priceData.id);
           if (!product) return;
 
+          product.precoCarregando = false;
           product.precoConsultado = true;
 
           if (priceData.preco !== null && priceData.preco !== undefined) {
@@ -94,19 +112,19 @@
           }
         });
 
-        renderProducts();
+        renderProducts(false);
       } catch (error) {
-        // Mantém a vitrine funcional mesmo se o serviço de preço estiver temporariamente indisponível.
+        chunks[i].forEach(function (id) {
+          var failed = byId.get(id);
+          if (failed) {
+            failed.precoCarregando = false;
+            failed.precoConsultado = true;
+          }
+        });
       }
     }
 
-    missing.forEach(function (product) {
-      if (product.preco === null || product.preco === undefined) {
-        product.precoConsultado = true;
-      }
-    });
-
-    renderProducts();
+    renderProducts(false);
   }
 
   function filteredProducts() {
@@ -262,7 +280,8 @@
       state.marketplace === "Todos" && state.category === "Todos" && !state.query;
   }
 
-  function renderProducts() {
+  function renderProducts(loadPrices) {
+    if (loadPrices === undefined) loadPrices = true;
     var products = filteredProducts();
     var grid = document.getElementById("productGrid");
     var empty = document.getElementById("emptyState");
@@ -290,6 +309,13 @@
     }
 
     updateActiveUI();
+
+    if (loadPrices) {
+      var visibleProducts = products.slice(0, state.visible);
+      window.setTimeout(function () {
+        hydrateMercadoLivrePrices(visibleProducts);
+      }, 0);
+    }
   }
 
   function setMarketplace(marketplace) {
@@ -447,7 +473,6 @@
       loadSidebarPreference();
       initEvents();
       renderProducts();
-      hydrateMercadoLivrePrices();
     })
     .catch(function () {
       document.getElementById("year").textContent = new Date().getFullYear();
