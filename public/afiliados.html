@@ -115,8 +115,10 @@
       "use strict";
 
       var products = [];
+      var allCatalogProducts = [];
       var batchSize = 30;
-      var storageKey = "casaNoCaprichoAffiliateLinksV3";
+      var storageKey = "casaNoCaprichoAffiliateLinksV4";
+      var fingerprintKey = storageKey + "Fingerprint";
 
       function getSaved(){
         try{return JSON.parse(localStorage.getItem(storageKey)||"{}");}
@@ -125,6 +127,21 @@
 
       function setSaved(data){
         localStorage.setItem(storageKey, JSON.stringify(data));
+      }
+
+      function catalogFingerprint(list){
+        return list.map(function(product){ return product.id; }).sort().join("|");
+      }
+
+      function prepareRoundStorage(list){
+        var fingerprint = catalogFingerprint(list);
+        var previous = localStorage.getItem(fingerprintKey);
+
+        if(previous !== fingerprint){
+          localStorage.removeItem(storageKey);
+          localStorage.removeItem(storageKey + "Rejected");
+          localStorage.setItem(fingerprintKey, fingerprint);
+        }
       }
 
       function batchesCount(){
@@ -303,7 +320,8 @@
               categoria: product.categoria,
               affiliateUrl: saved[product.id] || null
             };
-          })
+          }),
+          catalogSnapshot: allCatalogProducts
         };
 
         var blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
@@ -334,11 +352,13 @@
         })
         .then(function(data){
           var allProducts = Array.isArray(data.produtos) ? data.produtos : [];
+          allCatalogProducts = allProducts;
           var approvedCount = allProducts.filter(function(product){ return Boolean(product.affiliateUrl); }).length;
           var rejectedCount = allProducts.filter(function(product){ return product.affiliateStatus === "rejected"; }).length;
           products = allProducts.filter(function(product){
             return !product.affiliateUrl && product.affiliateStatus !== "rejected";
           });
+          prepareRoundStorage(products);
 
           var validUrls = products.filter(function(product){ return Boolean(product.catalogUrl); }).length;
           document.getElementById("catalogStatus").textContent =
