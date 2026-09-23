@@ -4,6 +4,7 @@
   var state = {
     products: [],
     category: "Todos",
+    marketplace: "Todos",
     query: "",
     visible: 12
   };
@@ -57,9 +58,10 @@
     return state.products
       .filter(function (product) {
         var categoryMatch = state.category === "Todos" || product.categoria === state.category;
-        var text = normalize([product.nome, product.marca, product.categoria].join(" "));
+        var marketplaceMatch = state.marketplace === "Todos" || product.marketplace === state.marketplace;
+        var text = normalize([product.nome, product.marca, product.categoria, product.marketplace].join(" "));
         var searchMatch = !q || text.indexOf(q) !== -1;
-        return categoryMatch && searchMatch;
+        return categoryMatch && marketplaceMatch && searchMatch;
       })
       .sort(function (a, b) {
         if (Boolean(a.affiliateUrl) !== Boolean(b.affiliateUrl)) {
@@ -90,8 +92,9 @@
     media.appendChild(img);
 
     var market = document.createElement("span");
-    market.className = "market-badge";
-    market.textContent = product.marketplace || "Mercado Livre";
+    var marketplace = product.marketplace || "Mercado Livre";
+    market.className = "market-badge " + (marketplace === "Shopee" ? "market-shopee" : "market-ml");
+    market.textContent = marketplace;
     media.appendChild(market);
 
     var cat = document.createElement("span");
@@ -173,6 +176,41 @@
 
     renderProducts();
     document.getElementById("achadinhos").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function setMarketplace(marketplace) {
+    state.marketplace = marketplace;
+    state.visible = 12;
+
+    document.querySelectorAll(".market-filter").forEach(function (button) {
+      button.classList.toggle("active", button.dataset.marketplace === marketplace);
+    });
+
+    renderProducts();
+  }
+
+  function renderMarketplaceFilters() {
+    var wrap = document.getElementById("marketplaceFilters");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+
+    var available = ["Mercado Livre", "Shopee"].filter(function (marketplace) {
+      return state.products.some(function (product) {
+        return product.marketplace === marketplace;
+      });
+    });
+
+    ["Todos"].concat(available).forEach(function (marketplace) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "filter-chip market-filter" + (marketplace === state.marketplace ? " active" : "");
+      button.dataset.marketplace = marketplace;
+      button.textContent = marketplace === "Todos" ? "Todos os marketplaces" : marketplace;
+      button.addEventListener("click", function () {
+        setMarketplace(marketplace);
+      });
+      wrap.appendChild(button);
+    });
   }
 
   function renderFilters() {
@@ -263,16 +301,36 @@
     document.getElementById("emptyState").querySelector("p").textContent = "Atualize a página em alguns instantes.";
   }
 
-  fetch("/data/products.json", { cache: "no-store" })
-    .then(function (response) {
-      if (!response.ok) throw new Error("Falha ao carregar catálogo");
+  Promise.all([
+    fetch("/data/products.json", { cache: "no-store" }).then(function (response) {
+      if (!response.ok) throw new Error("Falha ao carregar Mercado Livre");
       return response.json();
-    })
-    .then(function (data) {
-      var allProducts = Array.isArray(data.produtos) ? data.produtos : [];
-      state.products = allProducts.filter(function (product) {
-        return Boolean(product.affiliateUrl);
-      });
+    }),
+    fetch("/data/shopee-products.json", { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) return { produtos: [] };
+        return response.json();
+      })
+      .catch(function () {
+        return { produtos: [] };
+      })
+  ])
+    .then(function (catalogos) {
+      var ml = Array.isArray(catalogos[0].produtos) ? catalogos[0].produtos : [];
+      var shopee = Array.isArray(catalogos[1].produtos) ? catalogos[1].produtos : [];
+      var vistos = new Set();
+
+      state.products = ml.concat(shopee)
+        .filter(function (product) {
+          return Boolean(product.affiliateUrl);
+        })
+        .filter(function (product) {
+          var key = (product.marketplace || "Mercado Livre") + ":" + product.id;
+          if (vistos.has(key)) return false;
+          vistos.add(key);
+          return true;
+        });
+
       document.getElementById("heroProductCount").textContent = state.products.length;
       var uniqueCategories = new Set(state.products.map(function (product) {
         return product.categoria;
@@ -280,6 +338,7 @@
       document.getElementById("heroCategoryCount").textContent = uniqueCategories.size;
       document.getElementById("year").textContent = new Date().getFullYear();
       renderCategories();
+      renderMarketplaceFilters();
       renderFilters();
       renderProducts();
       updatePreviewNotice();
