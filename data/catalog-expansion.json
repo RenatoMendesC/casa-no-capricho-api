@@ -1,0 +1,69 @@
+{
+  "projeto": "Casa no Capricho",
+  "status": "preparado_para_expansao",
+  "manterCatalogoAtual": 181,
+  "publicarSomenteComLinkAfiliado": true,
+  "itensSolicitados": [
+    {
+      "tipo": "Colheres de pau",
+      "categoria": "Cozinha",
+      "termos": [
+        "colher de pau",
+        "colher madeira cozinha"
+      ]
+    },
+    {
+      "tipo": "Talheres de silicone",
+      "categoria": "Cozinha",
+      "termos": [
+        "talheres silicone",
+        "kit utensilios silicone"
+      ]
+    },
+    {
+      "tipo": "Panelas",
+      "categoria": "Cozinha",
+      "termos": [
+        "jogo de panelas",
+        "panela antiaderente"
+      ]
+    },
+    {
+      "tipo": "Panelas de pressão",
+      "categoria": "Cozinha",
+      "termos": [
+        "panela pressao",
+        "panela de pressao",
+        "panela pressao eletrica"
+      ]
+    },
+    {
+      "tipo": "Roupeiros",
+      "categoria": "Móveis",
+      "termos": [
+        "roupeiro",
+        "guarda roupa"
+      ]
+    },
+    {
+      "tipo": "Mesas",
+      "categoria": "Móveis",
+      "termos": [
+        "mesa jantar",
+        "mesa cozinha",
+        "mesa dobravel",
+        "mesa auxiliar"
+      ]
+    },
+    {
+      "tipo": "Passa-pratos / porta-pratos",
+      "categoria": "Cozinha / Móveis",
+      "termos": [
+        "porta pratos",
+        "escorredor pratos",
+        "passa pratos",
+        "balcao passa pratos"
+      ]
+    }
+  ]
+}
