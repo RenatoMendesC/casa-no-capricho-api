@@ -53,13 +53,13 @@
     <div class="container">
       <span class="section-kicker">Links em massa</span>
       <h1 class="tool-title">Vamos colocar os links sem fazer 200 vezes.</h1>
-      <p class="tool-lead">Esta tela separa o catálogo em lotes de 50. Você copia cada lote para o Gerador de Links oficial do Mercado Livre, cola os links gerados de volta aqui e, no final, baixa um único arquivo pronto para eu subir no site.</p>
+      <p class="tool-lead">Esta tela separa o catálogo em lotes de no máximo 30. Você copia cada lote para o Gerador de Links oficial do Mercado Livre, cola os links gerados de volta aqui e, no final, baixa um único arquivo pronto para eu subir no site.</p>
 
       <section class="tool-card">
         <div class="step">
           <div class="step-number">1</div>
           <div>
-            <h2>Copie as URLs dos produtos</h2>
+            <h2>Copie as URLs dos produtos em lotes de até 30</h2>
             <p id="catalogStatus">Carregando catálogo...</p>
             <div class="batch-row" id="copyButtons"></div>
             <pre class="url-preview" id="urlPreview">Aguardando catálogo...</pre>
@@ -115,7 +115,7 @@
       "use strict";
 
       var products = [];
-      var batchSize = 50;
+      var batchSize = 30;
       var storageKey = "casaNoCaprichoAffiliateLinksV1";
 
       function getSaved(){
@@ -276,7 +276,7 @@
         })
         .then(function(data){
           products = Array.isArray(data.produtos) ? data.produtos : [];
-          document.getElementById("catalogStatus").textContent = products.length + " produtos carregados. Copie em lotes para gerar os links em massa.";
+          document.getElementById("catalogStatus").textContent = products.length + " produtos carregados. Os lotes têm no máximo 30 links para ficar dentro do limite do gerador.";
           document.getElementById("urlPreview").textContent = products.slice(0, Math.min(8, products.length)).map(productUrl).join("\n") + (products.length > 8 ? "\n..." : "");
           renderBatchControls();
           renderProgress();
