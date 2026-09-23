@@ -78,9 +78,9 @@
           <div class="step-number">3</div>
           <div>
             <h2>Cole o resultado do lote</h2>
-            <p>Escolha qual lote você gerou e cole um link por linha.</p>
+            <p>Escolha o lote e cole exatamente o conteúdo de “Copiar todos” do Mercado Livre. Pode conter links e mensagens de erro; a página identifica os aceitos e rejeitados pela posição.</p>
             <select class="batch-select" id="batchSelect" aria-label="Selecionar lote"></select>
-            <textarea class="paste-area" id="affiliatePaste" placeholder="Cole aqui os links de afiliado gerados pelo Mercado Livre, um por linha..."></textarea>
+            <textarea class="paste-area" id="affiliatePaste" placeholder="Cole aqui o conteúdo de “Copiar todos” do Mercado Livre, mantendo uma linha por produto..."></textarea>
             <div class="batch-row">
               <button class="action-btn" id="saveBatchBtn" type="button">Salvar este lote</button>
               <button class="action-btn secondary" id="clearBatchBtn" type="button">Limpar lote selecionado</button>
@@ -140,11 +140,15 @@
         return product.catalogUrl || "";
       }
 
-      function extractLinks(text){
+      function parseLines(text){
         return String(text || "")
           .split(/\r?\n/)
           .map(function(line){return line.trim();})
-          .filter(function(line){return /^https?:\/\//i.test(line);});
+          .filter(function(line){return line.length > 0;});
+      }
+
+      function isUrl(line){
+        return /^https?:\/\//i.test(String(line || ""));
       }
 
       function showMessage(text, error){
@@ -210,21 +214,52 @@
       document.getElementById("saveBatchBtn").addEventListener("click", function(){
         var batchIndex = Number(document.getElementById("batchSelect").value);
         var batch = batchProducts(batchIndex);
-        var links = extractLinks(document.getElementById("affiliatePaste").value);
+        var lines = parseLines(document.getElementById("affiliatePaste").value);
 
-        if(links.length !== batch.length){
-          showMessage("Este lote tem " + batch.length + " produtos, mas encontrei " + links.length + " links. Cole exatamente um link por produto, na mesma ordem.", true);
-          return;
+        if(lines.length !== batch.length){
+          var onlyUrls = lines.filter(isUrl);
+
+          if(onlyUrls.length === batch.length){
+            lines = onlyUrls;
+          } else {
+            showMessage(
+              "Este lote tem " + batch.length + " produtos. Cole o conteúdo completo de “Copiar todos” do Mercado Livre, mantendo as mensagens de erro no lugar dos links rejeitados. Recebi " + lines.length + " linhas.",
+              true
+            );
+            return;
+          }
         }
 
         var saved = getSaved();
+        var rejectedKey = storageKey + "Rejected";
+        var rejected;
+        try{ rejected = JSON.parse(localStorage.getItem(rejectedKey)||"{}"); }
+        catch(e){ rejected = {}; }
+
+        var accepted = 0;
+        var rejectedCount = 0;
+
         batch.forEach(function(product, index){
-          saved[product.id] = links[index];
+          var line = lines[index];
+
+          if(isUrl(line)){
+            saved[product.id] = line;
+            delete rejected[product.id];
+            accepted++;
+          } else {
+            delete saved[product.id];
+            rejected[product.id] = line || "Rejeitado pelo programa";
+            rejectedCount++;
+          }
         });
+
         setSaved(saved);
+        localStorage.setItem(rejectedKey, JSON.stringify(rejected));
         document.getElementById("affiliatePaste").value = "";
         renderProgress();
-        showMessage("Lote " + (batchIndex+1) + " salvo com " + links.length + " links.");
+        showMessage(
+          "Lote " + (batchIndex+1) + " processado: " + accepted + " aceitos e " + rejectedCount + " rejeitados."
+        );
       });
 
       document.getElementById("clearBatchBtn").addEventListener("click", function(){
@@ -245,6 +280,10 @@
           geradoEm: new Date().toISOString(),
           quantidadeProdutos: products.length,
           quantidadeLinks: products.filter(function(p){return Boolean(saved[p.id]);}).length,
+          rejeitados: (function(){
+            try{return JSON.parse(localStorage.getItem(storageKey + "Rejected")||"{}");}
+            catch(e){return {};}
+          })(),
           links: products.map(function(product, index){
             return {
               ordem: index + 1,
@@ -271,6 +310,7 @@
 
       document.getElementById("resetBtn").addEventListener("click", function(){
         localStorage.removeItem(storageKey);
+        localStorage.removeItem(storageKey + "Rejected");
         document.getElementById("affiliatePaste").value = "";
         renderProgress();
         showMessage("Links locais zerados.");
