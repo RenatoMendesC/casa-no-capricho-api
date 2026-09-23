@@ -124,6 +124,26 @@
   function productCard(product) {
     var article = document.createElement("article");
     article.className = "product-card";
+    article.tabIndex = 0;
+    article.setAttribute("role", "link");
+    article.setAttribute("aria-label", "Abrir oferta: " + cleanTitle(product.nome));
+
+    function abrirOferta() {
+      var opened = window.open(product.affiliateUrl, "_blank", "noopener");
+      if (!opened) window.location.href = product.affiliateUrl;
+    }
+
+    article.addEventListener("click", function (event) {
+      if (event.target.closest("a, button")) return;
+      abrirOferta();
+    });
+
+    article.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        abrirOferta();
+      }
+    });
 
     var media = document.createElement("div");
     media.className = "product-media";
@@ -207,6 +227,9 @@
     link.target = "_blank";
     link.rel = "noopener sponsored";
     link.textContent = "Ver oferta";
+    link.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
 
     meta.appendChild(code);
     meta.appendChild(link);
