@@ -320,6 +320,7 @@
 
   function setMarketplace(marketplace) {
     state.marketplace = marketplace;
+    state.category = "Todos";
     state.visible = 16;
     renderSidebarCategories();
     renderProducts();
@@ -438,6 +439,60 @@
     return "/data/shopee/shard-" + String(index + 1).padStart(2, "0") + ".json";
   });
 
+  var shopeeExtraChunkUrls = Array.from({ length: 16 }, function (_, index) {
+    return "/data/shopee/add1000-" + String(index + 1).padStart(2, "0") + ".txt";
+  });
+
+  async function loadShopeeExtra1000() {
+    if (typeof DecompressionStream === "undefined") return [];
+
+    var parts = await Promise.all(shopeeExtraChunkUrls.map(function (url) {
+      return fetch(url, { cache: "no-store" }).then(function (response) {
+        if (!response.ok) throw new Error("Falha ao carregar lote extra Shopee");
+        return response.text();
+      });
+    }));
+
+    var base64 = parts.join("");
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+
+    for (var i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    var text = await new Response(stream).text();
+    var compact = JSON.parse(text);
+    var categories = Array.isArray(compact.c) ? compact.c : [];
+
+    return (Array.isArray(compact.p) ? compact.p : []).map(function (row) {
+      var id = String(row[0]);
+      var seller = String(row[1]);
+      var title = row[2];
+      var imageSuffix = row[3];
+      var category = categories[row[4]] || "Utilidades";
+      var price = Number(row[5]);
+      var imageUrl = "https://cf.shopee.com.br/file/" + imageSuffix;
+
+      return {
+        id: id,
+        nome: title,
+        marca: "Shopee",
+        imagem: imageUrl,
+        imagens: [imageUrl],
+        categoria: category,
+        marketplace: "Shopee",
+        affiliateUrl: "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.com.br%2Fproduct%2F" + seller + "%2F" + id,
+        productUrl: "https://shopee.com.br/product/" + seller + "/" + id,
+        affiliateStatus: "approved",
+        preco: price,
+        moeda: "BRL",
+        origemSelecao: "SHOPEE_DATAFEED_OFICIAL"
+      };
+    });
+  }
+
   Promise.all([
     fetch("/data/products.json", { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("Falha ao carregar Mercado Livre");
@@ -449,13 +504,16 @@
           if (!response.ok) throw new Error("Falha ao carregar lote Shopee");
           return response.json();
         });
-    }))
+    })),
+    loadShopeeExtra1000().catch(function () { return []; })
   ])
     .then(function (catalogs) {
       var ml = Array.isArray(catalogs[0].produtos) ? catalogs[0].produtos : [];
-      var shopee = catalogs[1].reduce(function (all, shard) {
+      var shopeeBase = catalogs[1].reduce(function (all, shard) {
         return all.concat(Array.isArray(shard.produtos) ? shard.produtos : []);
       }, []);
+      var shopeeExtra = Array.isArray(catalogs[2]) ? catalogs[2] : [];
+      var shopee = shopeeBase.concat(shopeeExtra);
       var seen = new Set();
 
       state.products = ml.concat(shopee)
