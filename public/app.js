@@ -268,7 +268,10 @@
       return response.json();
     })
     .then(function (data) {
-      state.products = Array.isArray(data.produtos) ? data.produtos : [];
+      var allProducts = Array.isArray(data.produtos) ? data.produtos : [];
+      state.products = allProducts.filter(function (product) {
+        return Boolean(product.affiliateUrl);
+      });
       document.getElementById("heroProductCount").textContent = state.products.length;
       var uniqueCategories = new Set(state.products.map(function (product) {
         return product.categoria;
