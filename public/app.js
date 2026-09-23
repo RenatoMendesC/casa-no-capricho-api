@@ -13,7 +13,12 @@
     "Cozinha": { icon: "◌", label: "Cozinha" },
     "Limpeza": { icon: "✦", label: "Limpeza" },
     "Banheiro": { icon: "♢", label: "Banheiro" },
-    "Decoração": { icon: "♡", label: "Decoração" }
+    "Decoração": { icon: "♡", label: "Decoração" },
+    "Quarto": { icon: "▤", label: "Quarto" },
+    "Lavanderia": { icon: "⌁", label: "Lavanderia" },
+    "Iluminação": { icon: "☼", label: "Iluminação" },
+    "Utilidades": { icon: "◇", label: "Utilidades" },
+    "Jardim": { icon: "♧", label: "Jardim" }
   };
 
   var featuredIds = [
@@ -169,7 +174,13 @@
     var chips = document.getElementById("filterChips");
     chips.innerHTML = "";
 
-    ["Todos"].concat(Object.keys(categoryMeta)).forEach(function (category) {
+    var available = Object.keys(categoryMeta).filter(function (category) {
+      return state.products.some(function (product) {
+        return product.categoria === category;
+      });
+    });
+
+    ["Todos"].concat(available).forEach(function (category) {
       var button = document.createElement("button");
       button.type = "button";
       button.className = "filter-chip" + (category === state.category ? " active" : "");
@@ -190,6 +201,8 @@
       var count = state.products.filter(function (product) {
         return product.categoria === category;
       }).length;
+
+      if (!count) return;
 
       var button = document.createElement("button");
       button.type = "button";
@@ -253,6 +266,10 @@
     .then(function (data) {
       state.products = Array.isArray(data.produtos) ? data.produtos : [];
       document.getElementById("heroProductCount").textContent = state.products.length;
+      var uniqueCategories = new Set(state.products.map(function (product) {
+        return product.categoria;
+      }).filter(Boolean));
+      document.getElementById("heroCategoryCount").textContent = uniqueCategories.size;
       document.getElementById("year").textContent = new Date().getFullYear();
       renderCategories();
       renderFilters();
