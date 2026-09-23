@@ -1,5 +1,6 @@
-const axios = require("axios");
+﻿const axios = require("axios");
 const crypto = require("crypto");
+const { obterTokens } = require("../config/tokenStore");
 
 const pkceStore = new Map();
 
@@ -69,7 +70,40 @@ async function trocarCodePorToken(code, state) {
   return response.data;
 }
 
+async function buscarProdutos(termo) {
+  const tokens = obterTokens();
+
+  if (!tokens?.access_token) {
+    throw new Error("Mercado Livre não está conectado.");
+  }
+
+  const response = await axios.get(
+    "https://api.mercadolibre.com/sites/MLB/search",
+    {
+      params: {
+        q: termo,
+        limit: 20
+      },
+      headers: {
+        Authorization: `Bearer ${tokens.access_token}`
+      }
+    }
+  );
+
+  return response.data.results.map((produto) => ({
+    id: produto.id,
+    nome: produto.title,
+    preco: produto.price,
+    imagem: produto.thumbnail
+      ? produto.thumbnail.replace("http://", "https://")
+      : null,
+    linkOriginal: produto.permalink,
+    categoria: produto.category_id
+  }));
+}
+
 module.exports = {
   gerarUrlAutorizacao,
-  trocarCodePorToken
+  trocarCodePorToken,
+  buscarProdutos
 };

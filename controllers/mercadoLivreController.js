@@ -1,11 +1,15 @@
-const {
+﻿const {
   gerarUrlAutorizacao,
-  trocarCodePorToken
+  trocarCodePorToken,
+  buscarProdutos
 } = require("../services/mercadoLivreService");
+
+const {
+  salvarTokens
+} = require("../config/tokenStore");
 
 function login(req, res) {
   const url = gerarUrlAutorizacao();
-
   res.redirect(url);
 }
 
@@ -21,11 +25,10 @@ async function callback(req, res) {
   try {
     const tokens = await trocarCodePorToken(code, state);
 
+    salvarTokens(tokens);
+
     console.log("Mercado Livre conectado.");
     console.log("User ID:", tokens.user_id);
-
-    // NÃO mostrar access_token ou refresh_token na tela.
-    // Depois vamos salvar isso corretamente no banco.
 
     res.send(`
       <h1>Casa no Capricho</h1>
@@ -49,7 +52,40 @@ async function callback(req, res) {
   }
 }
 
+async function buscar(req, res) {
+  try {
+    const termo = req.query.q;
+
+    if (!termo) {
+      return res.status(400).json({
+        erro: "Informe uma busca. Exemplo: ?q=organizador"
+      });
+    }
+
+    const produtos = await buscarProdutos(termo);
+
+    res.json({
+      busca: termo,
+      quantidade: produtos.length,
+      produtos
+    });
+
+  } catch (error) {
+    console.error(
+      error.response?.data ||
+      error.message
+    );
+
+    res.status(500).json({
+      erro:
+        error.response?.data ||
+        error.message
+    });
+  }
+}
+
 module.exports = {
   login,
-  callback
+  callback,
+  buscar
 };
