@@ -319,21 +319,28 @@
     empty.querySelector("p").textContent = "Atualize a página em alguns instantes.";
   }
 
+  var shopeeShardUrls = Array.from({ length: 10 }, function (_, index) {
+    return "/data/shopee/shard-" + String(index + 1).padStart(2, "0") + ".json";
+  });
+
   Promise.all([
     fetch("/data/products.json", { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("Falha ao carregar Mercado Livre");
       return response.json();
     }),
-    fetch("/data/shopee-products.json", { cache: "no-store" })
-      .then(function (response) {
-        if (!response.ok) return { produtos: [] };
-        return response.json();
-      })
-      .catch(function () { return { produtos: [] }; })
+    Promise.all(shopeeShardUrls.map(function (url) {
+      return fetch(url, { cache: "no-store" })
+        .then(function (response) {
+          if (!response.ok) throw new Error("Falha ao carregar lote Shopee");
+          return response.json();
+        });
+    }))
   ])
     .then(function (catalogs) {
       var ml = Array.isArray(catalogs[0].produtos) ? catalogs[0].produtos : [];
-      var shopee = Array.isArray(catalogs[1].produtos) ? catalogs[1].produtos : [];
+      var shopee = catalogs[1].reduce(function (all, shard) {
+        return all.concat(Array.isArray(shard.produtos) ? shard.produtos : []);
+      }, []);
       var seen = new Set();
 
       state.products = ml.concat(shopee)
