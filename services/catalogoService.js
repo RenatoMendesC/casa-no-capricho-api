@@ -4,23 +4,27 @@ const path = require("path");
 const { obterTokens } = require("../config/tokenStore");
 
 const REVIEW_PATH = path.join(__dirname, "..", "data", "affiliate-review.json");
+const CATALOG_PATH = path.join(__dirname, "..", "public", "data", "products.json");
+const TARGET_TOTAL = 200;
+const SOFT_CATEGORY_CAP = 30;
 
 const CATEGORIAS = [
-  { categoria: "Organização", termos: ["organizador gaveta", "organizador geladeira", "sapateira organizadora", "caixa organizadora", "organizador armario", "organizador cozinha"] },
-  { categoria: "Cozinha", termos: ["potes hermeticos cozinha", "porta temperos cozinha", "escorredor louca", "cortador legumes", "utensilios cozinha", "organizador cozinha"] },
-  { categoria: "Limpeza", termos: ["mop limpeza", "escova eletrica limpeza", "aspirador vertical casa", "limpa vidros", "rodo limpeza", "kit limpeza casa"] },
-  { categoria: "Banheiro", termos: ["prateleira banheiro", "organizador box banheiro", "porta escovas banheiro", "dispenser sabonete banheiro", "armario banheiro", "suporte banheiro"] },
-  { categoria: "Decoração", termos: ["espelho decorativo casa", "vaso decorativo casa", "almofada decorativa", "quadro decorativo casa", "tapete decorativo", "decoracao sala"] },
-  { categoria: "Quarto", termos: ["jogo de cama", "cabide veludo", "organizador roupas", "cortina blackout", "roupa de cama", "organizador guarda roupa"] },
-  { categoria: "Lavanderia", termos: ["varal retratil", "cesto roupa suja", "organizador lavanderia", "saco organizador vacuo", "prateleira lavanderia", "cesto lavanderia"] },
-  { categoria: "Iluminação", termos: ["luz sensor movimento", "fita led casa", "luminaria sem fio", "abajur decorativo", "luminaria led", "luz noturna"] },
-  { categoria: "Utilidades", termos: ["seladora alimentos", "balanca digital cozinha", "umidificador aromatizador", "dispenser automatico", "mini ventilador", "organizador multiuso"] },
-  { categoria: "Jardim", termos: ["vaso plantas decorativo", "kit jardinagem", "mangueira expansivel", "regador plantas", "suporte plantas", "jardim vertical"] }
+  { categoria: "Organização", termos: ["organizador gaveta", "organizador geladeira", "sapateira organizadora", "caixa organizadora", "organizador armario", "organizador cozinha", "cesto organizador", "prateleira organizadora"] },
+  { categoria: "Cozinha", termos: ["potes hermeticos cozinha", "porta temperos cozinha", "escorredor louca", "cortador legumes", "utensilios cozinha", "organizador cozinha", "escorredor talheres", "porta mantimentos"] },
+  { categoria: "Limpeza", termos: ["mop limpeza", "escova eletrica limpeza", "aspirador vertical casa", "limpa vidros", "rodo limpeza", "kit limpeza casa", "esfregao limpeza", "pano microfibra"] },
+  { categoria: "Banheiro", termos: ["prateleira banheiro", "organizador box banheiro", "porta escovas banheiro", "dispenser sabonete banheiro", "armario banheiro", "suporte banheiro", "porta toalha banheiro", "nicho banheiro"] },
+  { categoria: "Decoração", termos: ["espelho decorativo casa", "vaso decorativo casa", "almofada decorativa", "quadro decorativo casa", "tapete decorativo", "decoracao sala", "nicho decorativo", "centro mesa decorativo"] },
+  { categoria: "Quarto", termos: ["jogo de cama", "cabide veludo", "organizador roupas", "cortina blackout", "roupa de cama", "organizador guarda roupa", "caixa organizadora quarto", "colmeia organizadora"] },
+  { categoria: "Lavanderia", termos: ["varal retratil", "cesto roupa suja", "organizador lavanderia", "saco organizador vacuo", "prateleira lavanderia", "cesto lavanderia", "armario lavanderia", "varal parede"] },
+  { categoria: "Iluminação", termos: ["luz sensor movimento", "fita led casa", "luminaria sem fio", "abajur decorativo", "luminaria led", "luz noturna", "luminaria mesa", "spot led"] },
+  { categoria: "Utilidades", termos: ["seladora alimentos", "balanca digital cozinha", "umidificador aromatizador", "dispenser automatico", "mini ventilador", "organizador multiuso", "suporte multiuso", "dispenser cozinha"] },
+  { categoria: "Jardim", termos: ["vaso plantas decorativo", "kit jardinagem", "mangueira expansivel", "regador plantas", "suporte plantas", "jardim vertical", "vaso autoirrigavel", "ferramentas jardinagem"] }
 ];
 
 const TERMOS_RUIDO = [
-  "fantasia", "camiseta", "camisa", "adesivo automotivo", "carro", "moto",
-  "festa infantil", "painel festa", "topo de bolo", "lembrancinha"
+  "fantasia", "camiseta", "camisa", "adesivo automotivo", "automotiva", "carro", "moto",
+  "festa infantil", "painel festa", "topo de bolo", "lembrancinha", "brinquedo", "drone",
+  "espada ninja", "samurai", "mamadeira"
 ];
 
 function headers() {
@@ -29,21 +33,25 @@ function headers() {
   return { Authorization: `Bearer ${tokens.access_token}` };
 }
 
-async function carregarRevisao() {
+async function carregarJsonSeguro(filePath, fallback) {
   try {
-    const raw = await fs.readFile(REVIEW_PATH, "utf8");
-    const data = JSON.parse(raw);
-
-    return {
-      aprovados: data.aprovados || {},
-      rejeitados: new Set(data.rejeitados || [])
-    };
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
   } catch {
-    return {
-      aprovados: {},
-      rejeitados: new Set()
-    };
+    return fallback;
   }
+}
+
+async function carregarRevisao() {
+  const data = await carregarJsonSeguro(REVIEW_PATH, {});
+  return {
+    aprovados: data.aprovados || {},
+    rejeitados: new Set(data.rejeitados || [])
+  };
+}
+
+async function carregarCatalogoAtual() {
+  const data = await carregarJsonSeguro(CATALOG_PATH, {});
+  return Array.isArray(data.produtos) ? data.produtos : [];
 }
 
 function marca(produto) {
@@ -69,7 +77,7 @@ function temRuido(produto) {
   return TERMOS_RUIDO.some(termo => nome.includes(normalizar(termo)));
 }
 
-function pontuar(produto, termo, aprovados) {
+function pontuar(produto, termo) {
   let score = 0;
   const nome = normalizar(produto.name);
   const palavras = normalizar(termo).split(/\s+/).filter(Boolean);
@@ -86,15 +94,32 @@ function pontuar(produto, termo, aprovados) {
   if (produto.product_standard) score += 1;
   if (!produto.children_ids?.length) score += 2;
 
-  // Produtos que já tiveram link de afiliado aprovado ficam no topo da seleção.
-  if (aprovados[produto.id]) score += 1000;
-
   return score;
 }
 
 function urlFallback(produto) {
-  const nome = slug(produto.name);
-  return `https://www.mercadolivre.com.br/${nome}/p/${produto.id}`;
+  return `https://www.mercadolivre.com.br/${slug(produto.name)}/p/${produto.id}`;
+}
+
+function formatar(produto, categoria, termo) {
+  return {
+    id: produto.id,
+    itemId: null,
+    nome: produto.name,
+    marca: marca(produto),
+    imagem: produto.pictures?.[0]?.url || null,
+    imagens: (produto.pictures || []).map(img => img.url),
+    categoria,
+    marketplace: "Mercado Livre",
+    affiliateUrl: null,
+    affiliateStatus: "pending",
+    catalogUrl: urlFallback(produto),
+    urlVerificada: false,
+    preco: null,
+    moeda: "BRL",
+    dominio: produto.domain_id || null,
+    score: pontuar(produto, termo)
+  };
 }
 
 async function pesquisarTermo(termo) {
@@ -107,18 +132,6 @@ async function pesquisarTermo(termo) {
     }
   );
   return response.data.results || [];
-}
-
-async function detalheProdutoSeguro(id) {
-  try {
-    const response = await axios.get(
-      `https://api.mercadolibre.com/products/${id}`,
-      { headers: headers(), timeout: 12000 }
-    );
-    return response.data || null;
-  } catch {
-    return null;
-  }
 }
 
 async function mapLimit(items, limit, worker) {
@@ -140,85 +153,85 @@ async function mapLimit(items, limit, worker) {
   return results;
 }
 
-function formatar(produto, categoria, termo, detalhe, aprovados) {
-  const permalink = detalhe?.permalink || urlFallback(produto);
-  const vencedor = detalhe?.buy_box_winner || null;
-
-  return {
-    id: produto.id,
-    itemId: vencedor?.item_id || null,
-    nome: detalhe?.name || produto.name,
-    marca: marca(produto),
-    imagem: detalhe?.pictures?.[0]?.url || produto.pictures?.[0]?.url || null,
-    imagens: (detalhe?.pictures || produto.pictures || []).map(img => img.url),
-    categoria,
-    marketplace: "Mercado Livre",
-    affiliateUrl: aprovados[produto.id] || null,
-    catalogUrl: permalink,
-    urlVerificada: Boolean(detalhe?.permalink),
-    preco: vencedor?.price ?? null,
-    moeda: vencedor?.currency_id || "BRL",
-    dominio: detalhe?.domain_id || produto.domain_id || null,
-    score: pontuar(produto, termo, aprovados)
-  };
-}
-
 async function gerarCatalogo200() {
-  const revisao = await carregarRevisao();
-  const { aprovados, rejeitados } = revisao;
+  const { aprovados, rejeitados } = await carregarRevisao();
+  const catalogoAtual = await carregarCatalogoAtual();
+
+  // Mantém para sempre os produtos cujo link já foi aprovado.
+  const preservados = [];
+  const usados = new Set();
+
+  for (const produto of catalogoAtual) {
+    const affiliateUrl = aprovados[produto.id];
+    if (!affiliateUrl || usados.has(produto.id)) continue;
+
+    preservados.push({
+      ...produto,
+      affiliateUrl,
+      affiliateStatus: "approved",
+      score: Math.max(Number(produto.score) || 0, 1000)
+    });
+    usados.add(produto.id);
+  }
 
   const buscas = CATEGORIAS.flatMap(config =>
     config.termos.map(termo => ({ categoria: config.categoria, termo }))
   );
 
-  const respostas = await mapLimit(buscas, 6, async busca => ({
+  const respostas = await mapLimit(buscas, 10, async busca => ({
     ...busca,
     resultados: await pesquisarTermo(busca.termo)
   }));
 
-  const idsGlobais = new Set();
-  const produtosFinais = [];
+  const candidatos = [];
+  const vistos = new Set(usados);
 
-  for (const config of CATEGORIAS) {
-    const candidatos = [];
-    const vistos = new Set();
+  for (const resposta of respostas.filter(Boolean)) {
+    for (const produto of (resposta.resultados || [])) {
+      if (!produto?.id || !produto?.name || !produto?.pictures?.length) continue;
+      if (produto.status !== "active") continue;
+      if (produto.children_ids?.length) continue;
+      if (temRuido(produto)) continue;
+      if (rejeitados.has(produto.id)) continue;
+      if (aprovados[produto.id]) continue;
+      if (vistos.has(produto.id)) continue;
 
-    respostas
-      .filter(r => r && r.categoria === config.categoria && Array.isArray(r.resultados))
-      .forEach(resposta => {
-        resposta.resultados.forEach(produto => {
-          if (!produto?.id || !produto?.name || !produto?.pictures?.length) return;
-          if (produto.status !== "active") return;
-          if (temRuido(produto)) return;
-          if (produto.children_ids?.length) return;
-          if (rejeitados.has(produto.id) && !aprovados[produto.id]) return;
-          if (vistos.has(produto.id) || idsGlobais.has(produto.id)) return;
-
-          vistos.add(produto.id);
-          candidatos.push({ produto, termo: resposta.termo });
-        });
-      });
-
-    candidatos.sort(
-      (a, b) =>
-        pontuar(b.produto, b.termo, aprovados) - pontuar(a.produto, a.termo, aprovados) ||
-        a.produto.name.localeCompare(b.produto.name, "pt-BR")
-    );
-
-    // Buscamos alguns candidatos extras para substituir automaticamente os já rejeitados.
-    const preSelecionados = candidatos.slice(0, 36);
-    const detalhes = await mapLimit(preSelecionados, 5, async c => detalheProdutoSeguro(c.produto.id));
-
-    const selecionados = preSelecionados
-      .map((c, i) => formatar(c.produto, config.categoria, c.termo, detalhes[i], aprovados))
-      .slice(0, 20);
-
-    selecionados.forEach(p => idsGlobais.add(p.id));
-    produtosFinais.push(...selecionados);
+      vistos.add(produto.id);
+      candidatos.push(formatar(produto, resposta.categoria, resposta.termo));
+    }
   }
 
-  if (produtosFinais.length < 150) {
-    throw new Error(`Catálogo gerado com poucos produtos (${produtosFinais.length}). Tente novamente.`);
+  candidatos.sort((a, b) =>
+    b.score - a.score || a.nome.localeCompare(b.nome, "pt-BR")
+  );
+
+  const produtosFinais = [...preservados];
+  const idsFinais = new Set(produtosFinais.map(p => p.id));
+  const contagemCategoria = {};
+
+  produtosFinais.forEach(p => {
+    contagemCategoria[p.categoria] = (contagemCategoria[p.categoria] || 0) + 1;
+  });
+
+  // Primeiro mantém variedade entre categorias.
+  for (const produto of candidatos) {
+    if (produtosFinais.length >= TARGET_TOTAL) break;
+    if (idsFinais.has(produto.id)) continue;
+    if ((contagemCategoria[produto.categoria] || 0) >= SOFT_CATEGORY_CAP) continue;
+
+    produtosFinais.push(produto);
+    idsFinais.add(produto.id);
+    contagemCategoria[produto.categoria] = (contagemCategoria[produto.categoria] || 0) + 1;
+  }
+
+  // Se ainda faltar, completa com os melhores restantes, sem travar por categoria.
+  for (const produto of candidatos) {
+    if (produtosFinais.length >= TARGET_TOTAL) break;
+    if (idsFinais.has(produto.id)) continue;
+
+    produtosFinais.push(produto);
+    idsFinais.add(produto.id);
+    contagemCategoria[produto.categoria] = (contagemCategoria[produto.categoria] || 0) + 1;
   }
 
   const linksAtivos = produtosFinais.filter(p => Boolean(p.affiliateUrl)).length;
@@ -227,11 +240,11 @@ async function gerarCatalogo200() {
     projeto: "Casa no Capricho",
     marketplace: "Mercado Livre",
     geradoEm: new Date().toISOString(),
-    criterio: "produto ativo, terminal, relevante, com imagens e aderente ao nicho; rejeitados de afiliados são substituídos",
+    criterio: "links aprovados preservados; novos candidatos ativos e não rejeitados, selecionados por relevancia, imagens e aderencia ao nicho",
     quantidade: produtosFinais.length,
     linksAtivos,
     pendentesAfiliado: produtosFinais.length - linksAtivos,
-    urlsVerificadas: produtosFinais.filter(p => p.urlVerificada).length,
+    rejeitadosConhecidos: rejeitados.size,
     categorias: Object.fromEntries(
       CATEGORIAS.map(c => [
         c.categoria,
@@ -241,10 +254,9 @@ async function gerarCatalogo200() {
     produtos: produtosFinais
   };
 
-  const destino = path.join(__dirname, "..", "public", "data", "products.json");
-  const temporario = destino + ".tmp";
+  const temporario = CATALOG_PATH + ".tmp";
   await fs.writeFile(temporario, JSON.stringify(payload), "utf8");
-  await fs.rename(temporario, destino);
+  await fs.rename(temporario, CATALOG_PATH);
 
   return payload;
 }
