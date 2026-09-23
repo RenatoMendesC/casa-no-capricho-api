@@ -3,5 +3,5 @@ services:
     name: casa-no-capricho-site
     runtime: static
     branch: main
-    buildCommand: echo "Static site ready"
+    buildCommand: node scripts/build-shopee-extra.js
     staticPublishPath: public
