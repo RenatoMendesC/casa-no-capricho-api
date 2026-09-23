@@ -13,9 +13,18 @@ app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
+app.get("/", (req, res) => {
+  res.redirect(302, "https://casa-no-capricho-site.onrender.com");
+});
+
 app.use(express.static(path.join(__dirname, "public"), {
   etag: true,
-  maxAge: "1h"
+  maxAge: 0,
+  setHeaders: (res, filePath) => {
+    if (/\.(?:js|css|json|txt)$/i.test(filePath)) {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    }
+  }
 }));
 
 app.get("/afiliados", (req, res) => {
