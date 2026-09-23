@@ -696,3 +696,24 @@ button { color: inherit; }
   .category-card .category-icon { margin-bottom: 16px; }
   .hero-actions .btn { width: 100%; text-align: center; }
 }
+
+.marketplace-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0;
+  scrollbar-width: none;
+}
+.marketplace-filters::-webkit-scrollbar { display: none; }
+.market-badge.market-shopee {
+  background: rgba(238, 77, 45, .96);
+  color: #fff;
+}
+.market-badge.market-ml {
+  background: rgba(255, 230, 0, .93);
+  color: #2f2f2f;
+}
+
+@media (max-width: 760px) {
+  .marketplace-filters { margin-top: 12px; }
+}
