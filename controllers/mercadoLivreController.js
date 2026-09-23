@@ -1,9 +1,9 @@
 ﻿const {
   gerarUrlAutorizacao,
   trocarCodePorToken,
-  consultarMinhaConta,
   consultarProduto,
-  consultarProdutos
+  consultarProdutos,
+  statusAplicacao
 } = require("../services/mercadoLivreService");
 
 const { salvarTokens } = require("../config/tokenStore");
@@ -33,16 +33,6 @@ async function callback(req, res) {
     `);
 
   } catch (error) {
-    res.status(500).json({
-      erro: error.response?.data || error.message
-    });
-  }
-}
-
-async function me(req, res) {
-  try {
-    res.json(await consultarMinhaConta());
-  } catch (error) {
     res.status(error.response?.status || 500).json({
       erro: error.response?.data || error.message
     });
@@ -58,9 +48,7 @@ async function produto(req, res) {
     }
 
     res.json(
-      await consultarProduto(
-        req.query.id.trim().toUpperCase()
-      )
+      await consultarProduto(req.query.id.trim().toUpperCase())
     );
 
   } catch (error) {
@@ -89,10 +77,21 @@ async function produtos(req, res) {
   }
 }
 
+async function status(req, res) {
+  try {
+    res.json(await statusAplicacao());
+
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      erro: error.response?.data || error.message
+    });
+  }
+}
+
 module.exports = {
   login,
   callback,
-  me,
   produto,
-  produtos
+  produtos,
+  status
 };

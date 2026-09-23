@@ -81,17 +81,6 @@ function getAuthHeaders() {
   };
 }
 
-async function consultarMinhaConta() {
-  const response = await axios.get(
-    "https://api.mercadolibre.com/users/me",
-    {
-      headers: getAuthHeaders()
-    }
-  );
-
-  return response.data;
-}
-
 async function consultarProduto(id) {
   const response = await axios.get(
     `https://api.mercadolibre.com/items/${id}`,
@@ -108,7 +97,6 @@ async function consultarProduto(id) {
     preco: p.price,
     moeda: p.currency_id,
     categoria: p.category_id,
-    condicao: p.condition,
     linkOriginal: p.permalink,
     imagemPrincipal: p.pictures?.[0]?.secure_url || null,
     imagens: (p.pictures || []).map(img => img.secure_url)
@@ -132,29 +120,37 @@ async function consultarProdutos(ids) {
     }
   );
 
-  return response.data.map(item => {
-    const p = item.body || {};
+  return response.data;
+}
 
-    return {
-      status: item.status_code,
-      id: item.id || p.id,
-      nome: p.title || null,
-      preco: p.price ?? null,
-      moeda: p.currency_id || null,
-      categoria: p.category_id || null,
-      linkOriginal: p.permalink || null,
-      imagemPrincipal:
-        p.pictures?.[0]?.secure_url || null,
-      imagens:
-        (p.pictures || []).map(img => img.secure_url)
-    };
-  });
+async function statusAplicacao() {
+  const tokens = obterTokens();
+
+  if (!tokens?.access_token) {
+    throw new Error("Mercado Livre não está conectado.");
+  }
+
+  const response = await axios.get(
+    `https://api.mercadolibre.com/applications/${process.env.MELI_CLIENT_ID}`,
+    {
+      headers: getAuthHeaders()
+    }
+  );
+
+  return {
+    active: response.data.active,
+    site_id: response.data.site_id,
+    scopes: response.data.scopes,
+    domains: response.data.domains,
+    certification_status: response.data.certification_status,
+    token_scope: tokens.scope
+  };
 }
 
 module.exports = {
   gerarUrlAutorizacao,
   trocarCodePorToken,
-  consultarMinhaConta,
   consultarProduto,
-  consultarProdutos
+  consultarProdutos,
+  statusAplicacao
 };
