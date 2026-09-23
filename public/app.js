@@ -439,21 +439,21 @@
     return "/data/shopee/shard-" + String(index + 1).padStart(2, "0") + ".json";
   });
 
-  var shopeeExtraChunkUrls = Array.from({ length: 16 }, function (_, index) {
+  var shopeeExtraPartUrls = Array.from({ length: 16 }, function (_, index) {
     return "/data/shopee/add1000-" + String(index + 1).padStart(2, "0") + ".txt";
   });
 
   async function loadShopeeExtra1000() {
     if (typeof DecompressionStream === "undefined") return [];
 
-    var parts = await Promise.all(shopeeExtraChunkUrls.map(function (url) {
+    var parts = await Promise.all(shopeeExtraPartUrls.map(function (url) {
       return fetch(url, { cache: "no-store" }).then(function (response) {
-        if (!response.ok) throw new Error("Falha ao carregar lote extra Shopee");
+        if (!response.ok) throw new Error("Falha ao carregar catálogo extra da Shopee");
         return response.text();
       });
     }));
 
-    var base64 = parts.join("");
+    var base64 = parts.join("").replace(/\s+/g, "");
     var binary = atob(base64);
     var bytes = new Uint8Array(binary.length);
 
@@ -462,33 +462,31 @@
     }
 
     var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-    var text = await new Response(stream).text();
-    var compact = JSON.parse(text);
+    var jsonText = await new Response(stream).text();
+    var compact = JSON.parse(jsonText);
     var categories = Array.isArray(compact.c) ? compact.c : [];
+    var items = Array.isArray(compact.p) ? compact.p : [];
 
-    return (Array.isArray(compact.p) ? compact.p : []).map(function (row) {
-      var id = String(row[0]);
-      var seller = String(row[1]);
-      var title = row[2];
-      var imageSuffix = row[3];
-      var category = categories[row[4]] || "Utilidades";
-      var price = Number(row[5]);
-      var imageUrl = "https://cf.shopee.com.br/file/" + imageSuffix;
+    return items.map(function (item) {
+      var itemId = String(item[0]);
+      var shopId = String(item[1]);
+      var productUrl = "https://shopee.com.br/product/" + shopId + "/" + itemId;
+      var imageUrl = "https://cf.shopee.com.br/file/" + item[3];
 
       return {
-        id: id,
-        nome: title,
+        id: itemId,
+        nome: item[2],
         marca: "Shopee",
         imagem: imageUrl,
         imagens: [imageUrl],
-        categoria: category,
+        categoria: categories[item[4]] || "Utilidades",
         marketplace: "Shopee",
-        affiliateUrl: "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.com.br%2Fproduct%2F" + seller + "%2F" + id,
-        productUrl: "https://shopee.com.br/product/" + seller + "/" + id,
+        affiliateUrl: "https://shope.ee/an_redir?origin_link=" + encodeURIComponent(productUrl),
+        productUrl: productUrl,
         affiliateStatus: "approved",
-        preco: price,
+        preco: Number(item[5]),
         moeda: "BRL",
-        origemSelecao: "SHOPEE_DATAFEED_OFICIAL"
+        origemSelecao: "SHOPEE_DATAFEED_OFICIAL_EXTRA"
       };
     });
   }
