@@ -385,3 +385,16 @@ body.sidebar-collapsed .secure-note{justify-content:center;padding:8px}
 @media(max-width:800px){
   .product-offer{align-items:flex-start;flex-direction:column}
 }
+
+
+/* CARD INTEIRO CLICAVEL */
+.product-card{
+  cursor:pointer;
+}
+.product-card:focus-visible{
+  outline:3px solid rgba(111,132,104,.35);
+  outline-offset:3px;
+}
+.product-card .product-link{
+  cursor:pointer;
+}
