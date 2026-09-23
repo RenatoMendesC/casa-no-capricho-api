@@ -447,17 +447,22 @@
       var itemId = String(item[0]);
       var shopId = String(item[1]);
       var productUrl = "https://shopee.com.br/product/" + shopId + "/" + itemId;
-      var imageUrl = "https://cf.shopee.com.br/file/" + item[3];
+      var imageValue = String(item[3] || "");
+      var imageUrl = imageValue.indexOf("http") === 0
+        ? imageValue
+        : "https://cf.shopee.com.br/file/" + imageValue;
+      var affiliateUrl = String(item[6] || productUrl);
+      var shopName = String(item[7] || "Shopee");
 
       return {
         id: itemId,
         nome: item[2],
-        marca: "Shopee",
+        marca: shopName,
         imagem: imageUrl,
         imagens: [imageUrl],
         categoria: categories[item[4]] || "Utilidades",
         marketplace: "Shopee",
-        affiliateUrl: "https://shope.ee/an_redir?origin_link=" + encodeURIComponent(productUrl),
+        affiliateUrl: affiliateUrl,
         productUrl: productUrl,
         affiliateStatus: "approved",
         preco: Number(item[5]),
