@@ -183,7 +183,21 @@
     "MLB23580283": "https://meli.la/2CXop1H",
     "MLB53022154": "https://meli.la/1sKnWAm",
     "MLB78409310": "https://meli.la/1rv38pt",
-    "MLB73828216": "https://meli.la/1Ry2z5F"
+    "MLB73828216": "https://meli.la/1Ry2z5F",
+    "MLB67301744": "https://meli.la/1f1vTFz",
+    "MLB53467465": "https://meli.la/34f5KtX",
+    "MLB77394777": "https://meli.la/193Kpgi",
+    "MLB50851032": "https://meli.la/1u5cevc",
+    "MLB50805764": "https://meli.la/11bknrH",
+    "MLB50850966": "https://meli.la/1RyPiR2",
+    "MLB53449336": "https://meli.la/1FLKbNK",
+    "MLB50850012": "https://meli.la/1o7MdJK",
+    "MLB50850830": "https://meli.la/2MadZkT",
+    "MLB20719323": "https://meli.la/2RRz1ta",
+    "MLB75084869": "https://meli.la/2jnWB7G",
+    "MLB75251529": "https://meli.la/2KM9zzJ",
+    "MLB75081665": "https://meli.la/1crs2dV",
+    "MLB75084870": "https://meli.la/1KjNfkC"
   },
   "rejeitados": [
     "MLB14479900",
@@ -193,6 +207,7 @@
     "MLB15109746",
     "MLB15109747",
     "MLB15109748",
+    "MLB16162793",
     "MLB17544762",
     "MLB17544763",
     "MLB20006706",
@@ -242,6 +257,7 @@
     "MLB24628540",
     "MLB24631005",
     "MLB24677684",
+    "MLB24745527",
     "MLB24837345",
     "MLB24922474",
     "MLB24944208",
@@ -259,6 +275,7 @@
     "MLB25458843",
     "MLB25526731",
     "MLB25557123",
+    "MLB25569955",
     "MLB25635765",
     "MLB25637205",
     "MLB25637770",
@@ -338,6 +355,7 @@
     "MLB28239615",
     "MLB28241679",
     "MLB28253727",
+    "MLB28259878",
     "MLB28296882",
     "MLB28333218",
     "MLB28338336",
@@ -391,6 +409,7 @@
     "MLB29688566",
     "MLB29747046",
     "MLB29772138",
+    "MLB29774230",
     "MLB29799577",
     "MLB29806328",
     "MLB29834619",
@@ -411,7 +430,9 @@
     "MLB32018078",
     "MLB32094458",
     "MLB32246445",
+    "MLB32270095",
     "MLB32286760",
+    "MLB32300127",
     "MLB32300237",
     "MLB32313056",
     "MLB32342774",
@@ -577,6 +598,7 @@
     "MLB44898119",
     "MLB44989185",
     "MLB45048222",
+    "MLB45101358",
     "MLB45430968",
     "MLB45457510",
     "MLB45550416",
@@ -600,6 +622,8 @@
     "MLB47008948",
     "MLB47018719",
     "MLB47086579",
+    "MLB47266164",
+    "MLB47394052",
     "MLB47575696",
     "MLB47610284",
     "MLB47612360",
@@ -620,6 +644,7 @@
     "MLB50617303",
     "MLB50686835",
     "MLB50695716",
+    "MLB50799543",
     "MLB50966535",
     "MLB50986234",
     "MLB51006685",
@@ -705,6 +730,7 @@
     "MLB64912876",
     "MLB64984261",
     "MLB65016913",
+    "MLB65102332",
     "MLB65126804",
     "MLB65290658",
     "MLB65345393",
@@ -718,6 +744,7 @@
     "MLB66426824",
     "MLB66573162",
     "MLB66652173",
+    "MLB66705745",
     "MLB66923096",
     "MLB66950240",
     "MLB67187042",
@@ -727,6 +754,7 @@
     "MLB67687614",
     "MLB67817702",
     "MLB67959601",
+    "MLB67974531",
     "MLB68101680",
     "MLB68236866",
     "MLB68337766",
@@ -741,6 +769,7 @@
     "MLB68826547",
     "MLB68922654",
     "MLB69077150",
+    "MLB69119638",
     "MLB69176694",
     "MLB69393309",
     "MLB69622214",
@@ -795,6 +824,7 @@
     "MLB75270638",
     "MLB75276314",
     "MLB75324144",
+    "MLB75327758",
     "MLB75420493",
     "MLB75623296",
     "MLB75862475",
@@ -884,11 +914,12 @@
     }
   ],
   "resumo": {
-    "produtosAnalisadosAcumulado": 860,
-    "linksRecebidosAcumulado": 184,
-    "linksUnicosPublicaveis": 181,
-    "rejeitadosUnicos": 679,
-    "conflitosDuplicados": 3
+    "produtosAnalisadosAcumulado": 890,
+    "linksRecebidosAcumulado": 198,
+    "linksUnicosPublicaveis": 195,
+    "rejeitadosUnicos": 695,
+    "conflitosDuplicados": 3,
+    "produtosPublicadosCatalogo": 187
   },
   "origens": [
     "links-afiliados-casa-no-capricho.json",
@@ -899,9 +930,10 @@
     "links-afiliados-casa-no-capricho (5).json",
     "links-afiliados-casa-no-capricho (6).json",
     "links-afiliados-casa-no-capricho (7).json",
-    "links-afiliados-casa-no-capricho (8).json"
+    "links-afiliados-casa-no-capricho (8).json",
+    "links-afiliados-casa-no-capricho (9).json"
   ],
-  "ultimaRodadaEm": "2026-09-23T16:04:17.938Z",
+  "ultimaRodadaEm": "2026-09-23T18:15:35.168Z",
   "rodadas": [
     {
       "rodada": 1,
@@ -973,8 +1005,52 @@
       "linksUnicosPublicaveis": 11,
       "rejeitados": 19,
       "conflitosDuplicados": 0
+    },
+    {
+      "rodada": 10,
+      "produtosAnalisados": 30,
+      "linksRecebidos": 14,
+      "linksUnicosPublicaveis": 14,
+      "publicadosNoCatalogo": 6,
+      "naoPublicadosPorCuradoria": 8,
+      "rejeitados": 16,
+      "conflitosDuplicados": 0
     }
   ],
-  "mercadoLivreFechado": true,
-  "totalMercadoLivreFinal": 181
+  "mercadoLivreFechado": false,
+  "totalMercadoLivreFinal": 181,
+  "curadoriaNaoPublicados": [
+    {
+      "id": "MLB67301744",
+      "motivo": "Acessório (cabo de força), não é panela"
+    },
+    {
+      "id": "MLB77394777",
+      "motivo": "Balcão de computador/recepção, fora da seleção Casa no Capricho"
+    },
+    {
+      "id": "MLB50805764",
+      "motivo": "Variante repetida de colher de pau"
+    },
+    {
+      "id": "MLB50850966",
+      "motivo": "Variante repetida de colher de pau"
+    },
+    {
+      "id": "MLB53449336",
+      "motivo": "Variante repetida de colher de pau"
+    },
+    {
+      "id": "MLB50850012",
+      "motivo": "Variante repetida de colher de pau"
+    },
+    {
+      "id": "MLB50850830",
+      "motivo": "Variante repetida de colher de pau"
+    },
+    {
+      "id": "MLB75084870",
+      "motivo": "Variante repetida do conjunto de banquetas"
+    }
+  ]
 }
