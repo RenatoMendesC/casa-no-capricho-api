@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  var ML_PRICE_API = "https://casa-no-capricho.onrender.com/api/catalogo/precos";
+
   var state = {
     products: [],
     category: "Todos",
@@ -46,6 +48,65 @@
     var number = Number(value);
     if (!Number.isFinite(number)) return "";
     return number.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
+  function chunkArray(items, size) {
+    var chunks = [];
+    for (var i = 0; i < items.length; i += size) {
+      chunks.push(items.slice(i, i + size));
+    }
+    return chunks;
+  }
+
+  async function hydrateMercadoLivrePrices() {
+    var missing = state.products.filter(function (product) {
+      return product.marketplace === "Mercado Livre" && (product.preco === null || product.preco === undefined);
+    });
+
+    if (!missing.length) return;
+
+    var byId = new Map(state.products.map(function (product) {
+      return [product.id, product];
+    }));
+
+    var chunks = chunkArray(missing.map(function (product) { return product.id; }), 30);
+
+    for (var i = 0; i < chunks.length; i++) {
+      try {
+        var response = await fetch(
+          ML_PRICE_API + "?ids=" + encodeURIComponent(chunks[i].join(",")),
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) continue;
+
+        var data = await response.json();
+        (data.produtos || []).forEach(function (priceData) {
+          var product = byId.get(priceData.id);
+          if (!product) return;
+
+          product.precoConsultado = true;
+
+          if (priceData.preco !== null && priceData.preco !== undefined) {
+            product.preco = Number(priceData.preco);
+            product.moeda = priceData.moeda || "BRL";
+            product.itemId = priceData.itemId || product.itemId || null;
+          }
+        });
+
+        renderProducts();
+      } catch (error) {
+        // Mantém a vitrine funcional mesmo se o serviço de preço estiver temporariamente indisponível.
+      }
+    }
+
+    missing.forEach(function (product) {
+      if (product.preco === null || product.preco === undefined) {
+        product.precoConsultado = true;
+      }
+    });
+
+    renderProducts();
   }
 
   function filteredProducts() {
@@ -120,6 +181,11 @@
       price.className = "product-price";
       price.textContent = priceText;
       offer.appendChild(price);
+    } else if (marketplace === "Mercado Livre") {
+      var priceStatus = document.createElement("span");
+      priceStatus.className = "product-price-status";
+      priceStatus.textContent = product.precoConsultado ? "Confira o preço atual" : "Consultando preço...";
+      offer.appendChild(priceStatus);
     }
     if (product.vendas) {
       var sales = document.createElement("span");
@@ -358,6 +424,7 @@
       loadSidebarPreference();
       initEvents();
       renderProducts();
+      hydrateMercadoLivrePrices();
     })
     .catch(function () {
       document.getElementById("year").textContent = new Date().getFullYear();
