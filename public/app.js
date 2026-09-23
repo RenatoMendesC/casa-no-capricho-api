@@ -41,6 +41,13 @@
       .trim();
   }
 
+  function formatPrice(value) {
+    if (value === null || value === undefined || value === "") return "";
+    var number = Number(value);
+    if (!Number.isFinite(number)) return "";
+    return number.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
   function filteredProducts() {
     var q = normalize(state.query);
 
@@ -60,12 +67,28 @@
     var media = document.createElement("div");
     media.className = "product-media";
 
-    var img = document.createElement("img");
-    img.src = product.imagem;
-    img.alt = cleanTitle(product.nome);
-    img.loading = "lazy";
-    img.decoding = "async";
-    media.appendChild(img);
+    if (product.imagem) {
+      var img = document.createElement("img");
+      img.src = product.imagem;
+      img.alt = cleanTitle(product.nome);
+      img.loading = "lazy";
+      img.decoding = "async";
+      media.appendChild(img);
+    } else {
+      var placeholder = document.createElement("div");
+      placeholder.className = "product-placeholder" + (product.marketplace === "Shopee" ? " shopee-placeholder" : "");
+      var placeholderIcon = document.createElement("span");
+      placeholderIcon.className = "placeholder-icon";
+      placeholderIcon.textContent = categoryMeta[product.categoria] || "⌂";
+      var placeholderTitle = document.createElement("strong");
+      placeholderTitle.textContent = product.categoria || "Casa";
+      var placeholderText = document.createElement("small");
+      placeholderText.textContent = product.marketplace === "Shopee" ? "Achadinho Shopee" : "Achadinho selecionado";
+      placeholder.appendChild(placeholderIcon);
+      placeholder.appendChild(placeholderTitle);
+      placeholder.appendChild(placeholderText);
+      media.appendChild(placeholder);
+    }
 
     var marketplace = product.marketplace || "Mercado Livre";
     var market = document.createElement("span");
@@ -89,6 +112,22 @@
     title.className = "product-title";
     title.textContent = cleanTitle(product.nome);
 
+    var offer = document.createElement("div");
+    offer.className = "product-offer";
+    var priceText = formatPrice(product.preco);
+    if (priceText) {
+      var price = document.createElement("strong");
+      price.className = "product-price";
+      price.textContent = priceText;
+      offer.appendChild(price);
+    }
+    if (product.vendas) {
+      var sales = document.createElement("span");
+      sales.className = "product-sales";
+      sales.textContent = product.vendas + " vendidos";
+      offer.appendChild(sales);
+    }
+
     var meta = document.createElement("div");
     meta.className = "product-meta";
 
@@ -107,6 +146,7 @@
     meta.appendChild(link);
     body.appendChild(brand);
     body.appendChild(title);
+    if (offer.childNodes.length) body.appendChild(offer);
     body.appendChild(meta);
     article.appendChild(media);
     article.appendChild(body);
