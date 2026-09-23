@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#718568">
-  <meta name="description" content="Casa no Capricho — achadinhos selecionados do Mercado Livre e Shopee para organização, cozinha, limpeza, banheiro, decoração, móveis e muito mais.">
+  <meta name="theme-color" content="#6f8468">
+  <meta name="description" content="Casa no Capricho — achadinhos selecionados do Mercado Livre e Shopee para deixar sua casa mais bonita, prática e organizada.">
   <meta property="og:title" content="Casa no Capricho">
   <meta property="og:description" content="Achadinhos que transformam sua casa.">
   <title>Casa no Capricho | Achadinhos para sua casa</title>
@@ -12,161 +12,126 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="preview-notice" id="previewNotice" hidden>
-    <span>Prévia do catálogo</span>
-    <strong>Os links de afiliado estão sendo configurados.</strong>
-  </div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Casa no Capricho">
+          <img src="/logo.svg" alt="" width="44" height="44">
+          <span class="brand-copy">
+            <strong>Casa no Capricho</strong>
+            <small>achadinhos para o lar</small>
+          </span>
+        </a>
+        <button class="collapse-btn" id="collapseSidebar" type="button" aria-label="Minimizar menu" title="Minimizar menu">‹</button>
+      </div>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="/" aria-label="Casa no Capricho - início">
-        <img src="/logo.svg" alt="" width="44" height="44">
-        <span class="brand-copy">
-          <strong>Casa no Capricho</strong>
-          <small>achadinhos para o seu lar</small>
-        </span>
-      </a>
+      <nav class="side-nav" aria-label="Menu principal">
+        <div class="nav-group">
+          <span class="nav-label">Loja</span>
+          <button class="nav-item market-nav active" type="button" data-marketplace="Todos">
+            <span class="nav-icon">⌂</span><span class="nav-text">Todos os produtos</span><span class="nav-count" id="allCount">0</span>
+          </button>
+          <button class="nav-item market-nav" type="button" data-marketplace="Mercado Livre">
+            <span class="nav-icon market-icon ml-icon">ML</span><span class="nav-text">Mercado Livre</span><span class="nav-count" id="mlCount">0</span>
+          </button>
+          <button class="nav-item market-nav" type="button" data-marketplace="Shopee">
+            <span class="nav-icon market-icon shopee-icon">S</span><span class="nav-text">Shopee</span><span class="nav-count" id="shopeeCount">0</span>
+          </button>
+        </div>
 
-      <nav class="main-nav" aria-label="Navegação principal">
-        <a href="#achadinhos">Achadinhos</a>
-        <a href="#categorias">Categorias</a>
-        <a href="#sobre">Sobre</a>
+        <div class="nav-group category-group">
+          <span class="nav-label">Categorias</span>
+          <div id="sidebarCategories"></div>
+        </div>
       </nav>
 
-      <a class="header-cta" href="#achadinhos">Ver produtos</a>
-    </div>
-  </header>
-
-  <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow"><span></span> Casa bonita sem complicação</div>
-          <h1>Achadinhos que deixam sua casa <em>no capricho.</em></h1>
-          <p>Organização, cozinha, limpeza, banheiro e decoração em uma seleção feita para facilitar seu dia e deixar cada cantinho mais bonito.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#achadinhos">Explorar achadinhos</a>
-            <a class="btn btn-secondary" href="#categorias">Ver categorias</a>
-          </div>
-          <div class="hero-highlights" aria-label="Destaques">
-            <div><strong id="heroProductCount">187</strong><span>achadinhos</span></div>
-            <div><strong id="heroCategoryCount">10</strong><span>categorias</span></div>
-            <div><strong>100%</strong><span>foco em casa</span></div>
-          </div>
-        </div>
-
-        <div class="hero-card" aria-hidden="true">
-          <div class="hero-card-top">
-            <span class="mini-tag">Seleção da semana</span>
-            <span class="spark">✦</span>
-          </div>
-          <div class="hero-house">
-            <div class="room room-one">
-              <span class="room-icon">⌂</span>
-              <strong>Organize</strong>
-              <small>mais espaço, menos bagunça</small>
-            </div>
-            <div class="room room-two">
-              <span class="room-icon">✦</span>
-              <strong>Renove</strong>
-              <small>detalhes que fazem diferença</small>
-            </div>
-            <div class="room room-three">
-              <span class="room-icon">♡</span>
-              <strong>Curta</strong>
-              <small>uma casa com a sua cara</small>
-            </div>
-          </div>
-          <p class="hero-card-note">Pequenos achados. Grandes mudanças no dia a dia.</p>
+      <div class="sidebar-bottom">
+        <div class="secure-note">
+          <span>✓</span>
+          <div><strong>Links selecionados</strong><small>Compras feitas nos marketplaces parceiros.</small></div>
         </div>
       </div>
-    </section>
+    </aside>
 
-    <section class="benefits">
-      <div class="container benefits-grid">
-        <div><span>✓</span><p><strong>Seleção prática</strong><small>Produtos úteis para o dia a dia</small></p></div>
-        <div><span>⌂</span><p><strong>Tudo para casa</strong><small>Do banheiro à cozinha</small></p></div>
-        <div><span>✦</span><p><strong>Novos achados</strong><small>Mercado Livre + Shopee</small></p></div>
-      </div>
-    </section>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <section class="section categories-section" id="categorias">
-      <div class="container">
-        <div class="section-heading">
+    <div class="page">
+      <header class="topbar">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Abrir menu">☰</button>
+        <label class="top-search">
+          <span aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" placeholder="Buscar produtos, marcas ou categorias..." autocomplete="off">
+          <kbd>Buscar</kbd>
+        </label>
+        <a class="top-cta" href="#achadinhos">Ver ofertas</a>
+      </header>
+
+      <main class="main-content">
+        <section class="welcome">
           <div>
-            <span class="section-kicker">Encontre pelo ambiente</span>
-            <h2>Categorias para cada cantinho</h2>
+            <span class="eyebrow">Casa bonita sem complicação</span>
+            <h1>Encontre o achadinho certo para cada cantinho.</h1>
+            <p>Uma vitrine organizada com produtos selecionados do Mercado Livre e da Shopee.</p>
           </div>
-          <p>Escolha uma categoria e veja só os achadinhos que combinam com o que você precisa agora.</p>
-        </div>
-        <div class="category-grid" id="categoryCards" aria-live="polite"></div>
-      </div>
-    </section>
+          <div class="welcome-stats">
+            <div><strong id="heroProductCount">0</strong><span>produtos</span></div>
+            <div><strong id="heroCategoryCount">0</strong><span>categorias</span></div>
+            <div><strong>2</strong><span>marketplaces</span></div>
+          </div>
+        </section>
 
-    <section class="section products-section" id="achadinhos">
-      <div class="container">
-        <div class="section-heading products-heading">
+        <section class="catalog-section" id="achadinhos">
+          <div class="catalog-heading">
+            <div>
+              <span class="section-kicker">Nossa seleção</span>
+              <h2 id="catalogTitle">Todos os produtos</h2>
+              <p id="resultLabel">Carregando produtos...</p>
+            </div>
+
+            <div class="market-tabs" role="tablist" aria-label="Marketplace">
+              <button class="market-tab active" type="button" data-marketplace="Todos">Todos</button>
+              <button class="market-tab" type="button" data-marketplace="Mercado Livre">Mercado Livre</button>
+              <button class="market-tab" type="button" data-marketplace="Shopee">Shopee</button>
+            </div>
+          </div>
+
+          <div class="active-filter-row">
+            <button class="active-category" id="activeCategoryBtn" type="button" data-category="Todos">Todas as categorias</button>
+            <button class="clear-filters" id="clearFiltersBtn" type="button" hidden>Limpar filtros</button>
+          </div>
+
+          <div class="product-grid" id="productGrid" aria-live="polite"></div>
+
+          <div class="empty-state" id="emptyState" hidden>
+            <span>⌕</span>
+            <h3>Nenhum achadinho encontrado</h3>
+            <p>Tente outro termo ou escolha outra categoria.</p>
+          </div>
+
+          <div class="load-more-wrap">
+            <button class="load-more" id="loadMoreBtn" type="button" hidden>Mostrar mais produtos</button>
+          </div>
+        </section>
+
+        <section class="about-card" id="sobre">
+          <img src="/logo.svg" alt="Casa no Capricho" width="68" height="68">
           <div>
-            <span class="section-kicker">Nossa seleção</span>
-            <h2>Achadinhos da Casa</h2>
+            <span class="section-kicker">Casa no Capricho</span>
+            <h2>Menos tempo procurando. Mais tempo curtindo sua casa.</h2>
+            <p>Reunimos utilidades, organização, cozinha, móveis, decoração e outros achadinhos em um só lugar.</p>
           </div>
-          <p id="resultLabel">Carregando produtos...</p>
-        </div>
+        </section>
+      </main>
 
-        <div class="catalog-toolbar">
-          <label class="search-box">
-            <span aria-hidden="true">⌕</span>
-            <input id="searchInput" type="search" placeholder="Buscar por produto ou marca..." autocomplete="off">
-          </label>
-          <div class="marketplace-filters" id="marketplaceFilters" aria-label="Filtrar por marketplace"></div>
-          <div class="filter-chips" id="filterChips" aria-label="Filtrar por categoria"></div>
-        </div>
-
-        <div class="product-grid" id="productGrid" aria-live="polite"></div>
-
-        <div class="empty-state" id="emptyState" hidden>
-          <span>⌕</span>
-          <h3>Nenhum achadinho encontrado</h3>
-          <p>Tente outro termo ou escolha uma categoria diferente.</p>
-        </div>
-
-        <div class="load-more-wrap">
-          <button class="btn btn-secondary" id="loadMoreBtn" type="button" hidden>Mostrar mais produtos</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="brand-story" id="sobre">
-      <div class="container brand-story-grid">
-        <div class="story-mark">
-          <img src="/logo.svg" alt="Casa no Capricho" width="92" height="92">
-        </div>
+      <footer class="site-footer">
         <div>
-          <span class="section-kicker">Casa no Capricho</span>
-          <h2>Mais praticidade, organização e estilo para o seu lar.</h2>
-          <p>A ideia é simples: reunir produtos interessantes em um só lugar para você descobrir soluções úteis sem perder tempo procurando em dezenas de páginas.</p>
+          <strong>Casa no Capricho</strong>
+          <p>Alguns links são de afiliado. Podemos receber comissão pela compra, sem custo extra para você.</p>
         </div>
-        <div class="story-list">
-          <span>Organização</span>
-          <span>Cozinha</span>
-          <span>Limpeza</span>
-          <span>Banheiro</span>
-          <span>Decoração</span>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-grid">
-      <div class="footer-brand">
-        <img src="/logo.svg" alt="" width="40" height="40">
-        <div><strong>Casa no Capricho</strong><small>Achadinhos que transformam sua casa.</small></div>
-      </div>
-      <p class="affiliate-disclaimer">Alguns links desta página podem ser links de afiliado. Quando você compra por eles, a Casa no Capricho pode receber uma comissão, sem custo extra para você.</p>
-      <p class="copyright">© <span id="year"></span> Casa no Capricho</p>
+        <span>© <span id="year"></span> Casa no Capricho</span>
+      </footer>
     </div>
-  </footer>
+  </div>
 
   <script src="/app.js" defer></script>
 </body>
