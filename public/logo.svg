@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title">
+  <title id="title">Casa no Capricho</title>
+  <rect width="160" height="160" rx="42" fill="#e8eee4"/>
+  <path d="M35 76 80 39l45 37v47a8 8 0 0 1-8 8H43a8 8 0 0 1-8-8V76Z" fill="#718568"/>
+  <path d="M54 82v35h20V95h12v22h20V82L80 61 54 82Z" fill="#fffdf9"/>
+  <path d="M80 80c-8-10-22-5-22 6 0 12 22 24 22 24s22-12 22-24c0-11-14-16-22-6Z" fill="#a87350"/>
+</svg>
