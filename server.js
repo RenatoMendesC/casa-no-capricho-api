@@ -18,6 +18,10 @@ app.use(express.static(path.join(__dirname, "public"), {
   maxAge: "1h"
 }));
 
+app.get("/afiliados", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "afiliados.html"));
+});
+
 app.get("/health", (req, res) => {
   res.json({
     ok: true,
