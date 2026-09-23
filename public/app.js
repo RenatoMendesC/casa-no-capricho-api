@@ -61,6 +61,10 @@
         return categoryMatch && searchMatch;
       })
       .sort(function (a, b) {
+        if (Boolean(a.affiliateUrl) !== Boolean(b.affiliateUrl)) {
+          return a.affiliateUrl ? -1 : 1;
+        }
+
         var ai = featuredIds.indexOf(a.id);
         var bi = featuredIds.indexOf(b.id);
         if (ai !== -1 && bi === -1) return -1;
