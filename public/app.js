@@ -18,7 +18,8 @@
     "Lavanderia": { icon: "⌁", label: "Lavanderia" },
     "Iluminação": { icon: "☼", label: "Iluminação" },
     "Utilidades": { icon: "◇", label: "Utilidades" },
-    "Jardim": { icon: "♧", label: "Jardim" }
+    "Jardim": { icon: "♧", label: "Jardim" },
+    "Móveis": { icon: "▥", label: "Móveis" }
   };
 
   var featuredIds = [
