@@ -116,7 +116,7 @@
 
       var products = [];
       var batchSize = 30;
-      var storageKey = "casaNoCaprichoAffiliateLinksV2";
+      var storageKey = "casaNoCaprichoAffiliateLinksV3";
 
       function getSaved(){
         try{return JSON.parse(localStorage.getItem(storageKey)||"{}");}
@@ -128,7 +128,7 @@
       }
 
       function batchesCount(){
-        return Math.max(1, Math.ceil(products.length / batchSize));
+        return products.length ? Math.ceil(products.length / batchSize) : 0;
       }
 
       function batchProducts(batchIndex){
@@ -163,6 +163,12 @@
         var select = document.getElementById("batchSelect");
         buttons.innerHTML = "";
         select.innerHTML = "";
+
+        if(!products.length){
+          buttons.innerHTML = "<strong>Todos os produtos deste catálogo já possuem link de afiliado.</strong>";
+          select.innerHTML = "<option value=\"0\">Nenhum lote pendente</option>";
+          return;
+        }
 
         for(var i=0;i<batchesCount();i++){
           (function(index){
@@ -212,6 +218,11 @@
       }
 
       document.getElementById("saveBatchBtn").addEventListener("click", function(){
+        if(!products.length){
+          showMessage("Não há produtos pendentes nesta rodada.");
+          return;
+        }
+
         var batchIndex = Number(document.getElementById("batchSelect").value);
         var batch = batchProducts(batchIndex);
         var lines = parseLines(document.getElementById("affiliatePaste").value);
@@ -322,9 +333,15 @@
           return response.json();
         })
         .then(function(data){
-          products = Array.isArray(data.produtos) ? data.produtos : [];
+          var allProducts = Array.isArray(data.produtos) ? data.produtos : [];
+          var approvedCount = allProducts.filter(function(product){ return Boolean(product.affiliateUrl); }).length;
+          products = allProducts.filter(function(product){ return !product.affiliateUrl; });
+
           var validUrls = products.filter(function(product){ return Boolean(product.catalogUrl); }).length;
-          document.getElementById("catalogStatus").textContent = products.length + " produtos carregados, com " + validUrls + " URLs prontas. Os lotes têm no máximo 30 links.";
+          document.getElementById("catalogStatus").textContent =
+            approvedCount + " produtos já aprovados e " +
+            products.length + " pendentes. Esta rodada mostra somente os pendentes, em lotes de no máximo 30.";
+
           var preview = products.slice(0, Math.min(8, products.length)).map(productUrl).filter(Boolean);
           document.getElementById("urlPreview").textContent = preview.length ? preview.join("\n") + (products.length > 8 ? "\n..." : "") : "Catálogo antigo detectado. Reconecte o Mercado Livre para atualizar as URLs.";
           renderBatchControls();
