@@ -3,6 +3,8 @@ const fs = require("fs/promises");
 const path = require("path");
 const { obterTokens } = require("../config/tokenStore");
 
+const REVIEW_PATH = path.join(__dirname, "..", "data", "affiliate-review.json");
+
 const CATEGORIAS = [
   { categoria: "Organização", termos: ["organizador gaveta", "organizador geladeira", "sapateira organizadora", "caixa organizadora", "organizador armario", "organizador cozinha"] },
   { categoria: "Cozinha", termos: ["potes hermeticos cozinha", "porta temperos cozinha", "escorredor louca", "cortador legumes", "utensilios cozinha", "organizador cozinha"] },
@@ -25,6 +27,23 @@ function headers() {
   const tokens = obterTokens();
   if (!tokens?.access_token) throw new Error("Mercado Livre não está conectado.");
   return { Authorization: `Bearer ${tokens.access_token}` };
+}
+
+async function carregarRevisao() {
+  try {
+    const raw = await fs.readFile(REVIEW_PATH, "utf8");
+    const data = JSON.parse(raw);
+
+    return {
+      aprovados: data.aprovados || {},
+      rejeitados: new Set(data.rejeitados || [])
+    };
+  } catch {
+    return {
+      aprovados: {},
+      rejeitados: new Set()
+    };
+  }
 }
 
 function marca(produto) {
@@ -50,7 +69,7 @@ function temRuido(produto) {
   return TERMOS_RUIDO.some(termo => nome.includes(normalizar(termo)));
 }
 
-function pontuar(produto, termo) {
+function pontuar(produto, termo, aprovados) {
   let score = 0;
   const nome = normalizar(produto.name);
   const palavras = normalizar(termo).split(/\s+/).filter(Boolean);
@@ -66,6 +85,9 @@ function pontuar(produto, termo) {
   if (produto.short_description?.content) score += 1;
   if (produto.product_standard) score += 1;
   if (!produto.children_ids?.length) score += 2;
+
+  // Produtos que já tiveram link de afiliado aprovado ficam no topo da seleção.
+  if (aprovados[produto.id]) score += 1000;
 
   return score;
 }
@@ -118,7 +140,7 @@ async function mapLimit(items, limit, worker) {
   return results;
 }
 
-function formatar(produto, categoria, termo, detalhe) {
+function formatar(produto, categoria, termo, detalhe, aprovados) {
   const permalink = detalhe?.permalink || urlFallback(produto);
   const vencedor = detalhe?.buy_box_winner || null;
 
@@ -131,17 +153,20 @@ function formatar(produto, categoria, termo, detalhe) {
     imagens: (detalhe?.pictures || produto.pictures || []).map(img => img.url),
     categoria,
     marketplace: "Mercado Livre",
-    affiliateUrl: null,
+    affiliateUrl: aprovados[produto.id] || null,
     catalogUrl: permalink,
     urlVerificada: Boolean(detalhe?.permalink),
     preco: vencedor?.price ?? null,
     moeda: vencedor?.currency_id || "BRL",
     dominio: detalhe?.domain_id || produto.domain_id || null,
-    score: pontuar(produto, termo)
+    score: pontuar(produto, termo, aprovados)
   };
 }
 
 async function gerarCatalogo200() {
+  const revisao = await carregarRevisao();
+  const { aprovados, rejeitados } = revisao;
+
   const buscas = CATEGORIAS.flatMap(config =>
     config.termos.map(termo => ({ categoria: config.categoria, termo }))
   );
@@ -166,6 +191,7 @@ async function gerarCatalogo200() {
           if (produto.status !== "active") return;
           if (temRuido(produto)) return;
           if (produto.children_ids?.length) return;
+          if (rejeitados.has(produto.id) && !aprovados[produto.id]) return;
           if (vistos.has(produto.id) || idsGlobais.has(produto.id)) return;
 
           vistos.add(produto.id);
@@ -175,17 +201,16 @@ async function gerarCatalogo200() {
 
     candidatos.sort(
       (a, b) =>
-        pontuar(b.produto, b.termo) - pontuar(a.produto, a.termo) ||
+        pontuar(b.produto, b.termo, aprovados) - pontuar(a.produto, a.termo, aprovados) ||
         a.produto.name.localeCompare(b.produto.name, "pt-BR")
     );
 
-    // Consultamos detalhes apenas dos melhores candidatos. Se a aplicação não
-    // tiver acesso a /products/{id}, usamos a URL canônica derivada do produto.
-    const preSelecionados = candidatos.slice(0, 28);
+    // Buscamos alguns candidatos extras para substituir automaticamente os já rejeitados.
+    const preSelecionados = candidatos.slice(0, 36);
     const detalhes = await mapLimit(preSelecionados, 5, async c => detalheProdutoSeguro(c.produto.id));
 
     const selecionados = preSelecionados
-      .map((c, i) => formatar(c.produto, config.categoria, c.termo, detalhes[i]))
+      .map((c, i) => formatar(c.produto, config.categoria, c.termo, detalhes[i], aprovados))
       .slice(0, 20);
 
     selecionados.forEach(p => idsGlobais.add(p.id));
@@ -196,12 +221,16 @@ async function gerarCatalogo200() {
     throw new Error(`Catálogo gerado com poucos produtos (${produtosFinais.length}). Tente novamente.`);
   }
 
+  const linksAtivos = produtosFinais.filter(p => Boolean(p.affiliateUrl)).length;
+
   const payload = {
     projeto: "Casa no Capricho",
     marketplace: "Mercado Livre",
     geradoEm: new Date().toISOString(),
-    criterio: "produto ativo, terminal, relevante, com imagens e aderente ao nicho",
+    criterio: "produto ativo, terminal, relevante, com imagens e aderente ao nicho; rejeitados de afiliados são substituídos",
     quantidade: produtosFinais.length,
+    linksAtivos,
+    pendentesAfiliado: produtosFinais.length - linksAtivos,
     urlsVerificadas: produtosFinais.filter(p => p.urlVerificada).length,
     categorias: Object.fromEntries(
       CATEGORIAS.map(c => [
