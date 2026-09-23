@@ -4,7 +4,7 @@ const zlib = require("zlib");
 const crypto = require("crypto");
 
 const base = path.join(__dirname, "..", "public", "data", "shopee");
-const EXPECTED_SHA256 = "8b722a4f82653e517da3b72853008fbb694f56c4a077ca052f3468ad9acbfae4";
+const EXPECTED_SHA256 = "2da192dfe4be8a4e8101c57483479b64c442239b4fb34a5a1ae2dc1517866edb";
 
 const base64 = Array.from({ length: 16 }, (_, index) => {
   const file = path.join(base, "add1000-" + String(index + 1).padStart(2, "0") + ".txt");
