@@ -1,0 +1,14 @@
+{
+  "projeto": "Casa no Capricho",
+  "marketplace": "Shopee",
+  "objetivo": 180,
+  "status": "aguardando_lote_de_links",
+  "formatoPreferido": "CSV exportado pela ferramenta oficial de links em massa da Shopee",
+  "regras": [
+    "Somente links de afiliado gerados pela ferramenta oficial da Shopee entram no site",
+    "Não raspar páginas da Shopee",
+    "Não publicar produto sem link de afiliado",
+    "Manter os 187 produtos atuais do Mercado Livre intactos",
+    "Evitar produtos repetidos ou variações quase idênticas"
+  ]
+}
