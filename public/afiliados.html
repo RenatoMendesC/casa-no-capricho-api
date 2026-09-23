@@ -116,7 +116,7 @@
 
       var products = [];
       var batchSize = 30;
-      var storageKey = "casaNoCaprichoAffiliateLinksV1";
+      var storageKey = "casaNoCaprichoAffiliateLinksV2";
 
       function getSaved(){
         try{return JSON.parse(localStorage.getItem(storageKey)||"{}");}
@@ -137,7 +137,7 @@
       }
 
       function productUrl(product){
-        return product.catalogUrl || ("https://www.mercadolivre.com.br/p/" + product.id);
+        return product.catalogUrl || "";
       }
 
       function extractLinks(text){
@@ -168,7 +168,14 @@
             btn.className = "batch-btn";
             btn.textContent = "Copiar lote " + (index+1) + " (" + batch.length + ")";
             btn.addEventListener("click", function(){
-              var text = batch.map(productUrl).join("\n");
+              var urls = batch.map(productUrl).filter(Boolean);
+
+              if(urls.length !== batch.length){
+                showMessage("Este catálogo ainda está com URLs antigas. Reconecte o Mercado Livre uma vez para atualizar os produtos e tente novamente.", true);
+                return;
+              }
+
+              var text = urls.join("\n");
               navigator.clipboard.writeText(text).then(function(){
                 btn.classList.add("done");
                 btn.textContent = "Lote " + (index+1) + " copiado";
@@ -276,8 +283,10 @@
         })
         .then(function(data){
           products = Array.isArray(data.produtos) ? data.produtos : [];
-          document.getElementById("catalogStatus").textContent = products.length + " produtos carregados. Os lotes têm no máximo 30 links para ficar dentro do limite do gerador.";
-          document.getElementById("urlPreview").textContent = products.slice(0, Math.min(8, products.length)).map(productUrl).join("\n") + (products.length > 8 ? "\n..." : "");
+          var validUrls = products.filter(function(product){ return Boolean(product.catalogUrl); }).length;
+          document.getElementById("catalogStatus").textContent = products.length + " produtos carregados, com " + validUrls + " URLs prontas. Os lotes têm no máximo 30 links.";
+          var preview = products.slice(0, Math.min(8, products.length)).map(productUrl).filter(Boolean);
+          document.getElementById("urlPreview").textContent = preview.length ? preview.join("\n") + (products.length > 8 ? "\n..." : "") : "Catálogo antigo detectado. Reconecte o Mercado Livre para atualizar as URLs.";
           renderBatchControls();
           renderProgress();
         })
