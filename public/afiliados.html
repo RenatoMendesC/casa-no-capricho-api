@@ -335,12 +335,16 @@
         .then(function(data){
           var allProducts = Array.isArray(data.produtos) ? data.produtos : [];
           var approvedCount = allProducts.filter(function(product){ return Boolean(product.affiliateUrl); }).length;
-          products = allProducts.filter(function(product){ return !product.affiliateUrl; });
+          var rejectedCount = allProducts.filter(function(product){ return product.affiliateStatus === "rejected"; }).length;
+          products = allProducts.filter(function(product){
+            return !product.affiliateUrl && product.affiliateStatus !== "rejected";
+          });
 
           var validUrls = products.filter(function(product){ return Boolean(product.catalogUrl); }).length;
           document.getElementById("catalogStatus").textContent =
             approvedCount + " produtos já aprovados e " +
-            products.length + " pendentes. Esta rodada mostra somente os pendentes, em lotes de no máximo 30.";
+            rejectedCount + " já rejeitados nesta rodada e " +
+            products.length + " pendentes. A página mostra somente os produtos ainda não testados.";
 
           var preview = products.slice(0, Math.min(8, products.length)).map(productUrl).filter(Boolean);
           document.getElementById("urlPreview").textContent = preview.length ? preview.join("\n") + (products.length > 8 ? "\n..." : "") : "Catálogo antigo detectado. Reconecte o Mercado Livre para atualizar as URLs.";
