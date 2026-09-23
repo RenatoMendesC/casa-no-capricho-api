@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: casa-no-capricho-site
+    runtime: static
+    branch: main
+    buildCommand: echo "Static site ready"
+    staticPublishPath: public
