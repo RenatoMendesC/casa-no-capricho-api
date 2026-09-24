@@ -133,7 +133,7 @@
     return state.products.filter(function (product) {
       var categoryMatch = state.category === "Todos" || product.categoria === state.category;
       var marketplaceMatch = state.marketplace === "Todos" || product.marketplace === state.marketplace;
-      var text = normalize([product.nome, product.marca, product.categoria, product.marketplace].join(" "));
+      var text = product._search || normalize([product.nome, product.marca, product.categoria, product.marketplace].join(" "));
       var searchMatch = !q || text.indexOf(q) !== -1;
       return categoryMatch && marketplaceMatch && searchMatch;
     });
@@ -392,10 +392,15 @@
       renderProducts();
     });
 
+    var searchTimer = null;
     document.getElementById("searchInput").addEventListener("input", function (event) {
-      state.query = event.target.value;
-      state.visible = 16;
-      renderProducts();
+      var value = event.target.value;
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(function () {
+        state.query = value;
+        state.visible = 16;
+        renderProducts();
+      }, 140);
     });
 
     document.getElementById("loadMoreBtn").addEventListener("click", function () {
@@ -447,87 +452,32 @@
       var imageUrl = imageValue.indexOf("http") === 0
         ? imageValue
         : "https://cf.shopee.com.br/file/" + imageValue;
-      var affiliateUrl = String(item[6] || productUrl);
-      var shopName = String(item[7] || "Shopee");
 
       return {
         id: itemId,
         nome: item[2],
-        marca: shopName,
+        marca: "Shopee",
         imagem: imageUrl,
-        imagens: [imageUrl],
         categoria: categories[item[4]] || "Utilidades",
         marketplace: "Shopee",
-        affiliateUrl: affiliateUrl,
+        affiliateUrl: "https://shope.ee/an_redir?origin_link=" + encodeURIComponent(productUrl),
         productUrl: productUrl,
-        affiliateStatus: "approved",
         preco: Number(item[5]),
-        moeda: "BRL",
-        origemSelecao: "SHOPEE_DATAFEED_OFICIAL_EXTRA"
+        moeda: "BRL"
       };
     });
   }
 
-  async function gunzipShopeeParts() {
-    var urls = Array.from({ length: 16 }, function (_, index) {
-      return "/data/shopee/add1000-" + String(index + 1).padStart(2, "0") + ".txt";
-    });
+  async function loadShopeeCatalog9633() {
+    var response = await fetch("/data/shopee/catalog-9633.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Falha ao carregar catálogo Shopee 10k");
 
-    var parts = await Promise.all(urls.map(function (url) {
-      return fetch(url, { cache: "no-store" }).then(function (response) {
-        if (!response.ok) throw new Error("Parte Shopee ausente");
-        return response.text();
-      });
-    }));
-
-    var base64 = parts.join("").replace(/\s+/g, "");
-    var binary = atob(base64);
-    var bytes = new Uint8Array(binary.length);
-
-    for (var i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
+    var compact = await response.json();
+    if (!Array.isArray(compact.p) || compact.p.length !== 9633) {
+      throw new Error("Catálogo Shopee 10k incompleto");
     }
 
-    if (window.pako && typeof window.pako.ungzip === "function") {
-      try {
-        return JSON.parse(window.pako.ungzip(bytes, { to: "string" }));
-      } catch (error) {
-        // Compatibilidade com o lote antigo que ficou com CRC/trailer do gzip inconsistente.
-        if (bytes.length > 18 && typeof window.pako.inflateRaw === "function") {
-          return JSON.parse(
-            window.pako.inflateRaw(bytes.subarray(10, bytes.length - 8), { to: "string" })
-          );
-        }
-        throw error;
-      }
-    }
-
-    if (typeof DecompressionStream !== "undefined") {
-      var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-      return JSON.parse(await new Response(stream).text());
-    }
-
-    throw new Error("Navegador sem suporte para descompactação");
-  }
-
-  async function loadShopeeExtra1000() {
-    try {
-      var response = await fetch("/data/shopee/extra-1000.json", { cache: "no-store" });
-      if (response.ok) {
-        var compact = await response.json();
-        if (Array.isArray(compact.p) && compact.p.length === 1000) {
-          return mapShopeeCompact(compact);
-        }
-      }
-    } catch (error) {}
-
-    var fallbackCompact = await gunzipShopeeParts();
-
-    if (!Array.isArray(fallbackCompact.p) || fallbackCompact.p.length !== 1000) {
-      throw new Error("Catálogo Shopee extra incompleto");
-    }
-
-    return mapShopeeCompact(fallbackCompact);
+    return mapShopeeCompact(compact);
   }
 
   Promise.all([
@@ -542,15 +492,15 @@
           return response.json();
         });
     })),
-    loadShopeeExtra1000().catch(function () { return []; })
+    loadShopeeCatalog9633()
   ])
     .then(function (catalogs) {
       var ml = Array.isArray(catalogs[0].produtos) ? catalogs[0].produtos : [];
       var shopeeBase = catalogs[1].reduce(function (all, shard) {
         return all.concat(Array.isArray(shard.produtos) ? shard.produtos : []);
       }, []);
-      var shopeeExtra = Array.isArray(catalogs[2]) ? catalogs[2] : [];
-      var shopee = shopeeBase.concat(shopeeExtra);
+      var shopeeCatalog = Array.isArray(catalogs[2]) ? catalogs[2] : [];
+      var shopee = shopeeBase.concat(shopeeCatalog);
       var seen = new Set();
 
       state.products = ml.concat(shopee)
@@ -560,7 +510,20 @@
           if (seen.has(key)) return false;
           seen.add(key);
           return true;
+        })
+        .map(function (product) {
+          product._search = normalize([
+            product.nome,
+            product.marca,
+            product.categoria,
+            product.marketplace
+          ].join(" "));
+          return product;
         });
+
+      if (state.products.length !== 10000) {
+        console.warn("Catálogo carregado com", state.products.length, "produtos; esperado: 10000.");
+      }
 
       document.getElementById("year").textContent = new Date().getFullYear();
       updateCounts();
