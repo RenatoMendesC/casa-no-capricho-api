@@ -29,9 +29,20 @@ if (checksum !== EXPECTED_SHA256) {
   throw new Error("Checksum do catálogo Shopee inválido: " + checksum);
 }
 
-const compact = JSON.parse(
-  zlib.gunzipSync(Buffer.from(base64, "base64")).toString("utf8")
-);
+const gzipBuffer = Buffer.from(base64, "base64");
+
+let decoded;
+try {
+  decoded = zlib.gunzipSync(gzipBuffer).toString("utf8");
+} catch (error) {
+  // Alguns lotes antigos ficaram com o CRC/trailer do gzip inconsistente.
+  // O payload DEFLATE continua válido; neste caso ignoramos apenas o trailer
+  // e validamos o JSON e a quantidade de produtos logo abaixo.
+  if (gzipBuffer.length <= 18) throw error;
+  decoded = zlib.inflateRawSync(gzipBuffer.subarray(10, gzipBuffer.length - 8)).toString("utf8");
+}
+
+const compact = JSON.parse(decoded);
 
 if (!Array.isArray(compact.p) || compact.p.length !== 1000) {
   throw new Error(
