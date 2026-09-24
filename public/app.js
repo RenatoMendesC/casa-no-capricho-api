@@ -301,11 +301,7 @@
 
     if (!products.length) {
       var p = empty.querySelector("p");
-      if (state.marketplace === "Shopee") {
-        p.textContent = "Os produtos da Shopee serão adicionados aqui conforme os lotes forem importados.";
-      } else {
-        p.textContent = "Tente outro termo ou escolha outra categoria.";
-      }
+      p.textContent = "Tente outro termo ou escolha outra categoria.";
     }
 
     updateActiveUI();
@@ -493,7 +489,17 @@
     }
 
     if (window.pako && typeof window.pako.ungzip === "function") {
-      return JSON.parse(window.pako.ungzip(bytes, { to: "string" }));
+      try {
+        return JSON.parse(window.pako.ungzip(bytes, { to: "string" }));
+      } catch (error) {
+        // Compatibilidade com o lote antigo que ficou com CRC/trailer do gzip inconsistente.
+        if (bytes.length > 18 && typeof window.pako.inflateRaw === "function") {
+          return JSON.parse(
+            window.pako.inflateRaw(bytes.subarray(10, bytes.length - 8), { to: "string" })
+          );
+        }
+        throw error;
+      }
     }
 
     if (typeof DecompressionStream !== "undefined") {
