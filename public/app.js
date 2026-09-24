@@ -440,6 +440,10 @@
     return "/data/shopee/shard-" + String(index + 1).padStart(2, "0") + ".json";
   });
 
+  var shopeeCatalogUrls = Array.from({ length: 20 }, function (_, index) {
+    return "/data/shopee10k/shard-" + String(index + 1).padStart(2, "0") + ".json";
+  });
+
   function mapShopeeCompact(compact) {
     var categories = Array.isArray(compact.c) ? compact.c : [];
     var items = Array.isArray(compact.p) ? compact.p : [];
@@ -468,18 +472,6 @@
     });
   }
 
-  async function loadShopeeCatalog9633() {
-    var response = await fetch("/data/shopee/catalog-9633.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("Falha ao carregar catálogo Shopee 10k");
-
-    var compact = await response.json();
-    if (!Array.isArray(compact.p) || compact.p.length !== 9633) {
-      throw new Error("Catálogo Shopee 10k incompleto");
-    }
-
-    return mapShopeeCompact(compact);
-  }
-
   Promise.all([
     fetch("/data/products.json", { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("Falha ao carregar Mercado Livre");
@@ -492,14 +484,23 @@
           return response.json();
         });
     })),
-    loadShopeeCatalog9633()
+    Promise.all(shopeeCatalogUrls.map(function (url) {
+      return fetch(url, { cache: "no-store" }).then(function (response) {
+        if (!response.ok) throw new Error("Falha ao carregar catálogo Shopee 10k");
+        return response.json();
+      });
+    }))
   ])
     .then(function (catalogs) {
       var ml = Array.isArray(catalogs[0].produtos) ? catalogs[0].produtos : [];
       var shopeeBase = catalogs[1].reduce(function (all, shard) {
         return all.concat(Array.isArray(shard.produtos) ? shard.produtos : []);
       }, []);
-      var shopeeCatalog = Array.isArray(catalogs[2]) ? catalogs[2] : [];
+      var shopeeCatalog = Array.isArray(catalogs[2])
+        ? catalogs[2].reduce(function (all, compactShard) {
+            return all.concat(mapShopeeCompact(compactShard));
+          }, [])
+        : [];
       var shopee = shopeeBase.concat(shopeeCatalog);
       var seen = new Set();
 
