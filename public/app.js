@@ -8,6 +8,7 @@
     category: "Todos",
     marketplace: "Todos",
     query: "",
+    collection: "Todos",
     visible: 16
   };
 
@@ -127,16 +128,44 @@
     renderProducts(false);
   }
 
+  function isSmartHomeProduct(product) {
+    var text = product._search || normalize([product.nome, product.marca, product.categoria].join(" "));
+    var keywords = [
+      "smart", "inteligent", "wifi", "wi-fi", "sensor", "camera", "lampada",
+      "tomada", "interruptor", "automacao", "controle remoto", "assistente virtual"
+    ];
+    return keywords.some(function (keyword) { return text.indexOf(keyword) !== -1; });
+  }
+
   function filteredProducts() {
     var q = normalize(state.query);
 
-    return state.products.filter(function (product) {
+    var products = state.products.filter(function (product) {
       var categoryMatch = state.category === "Todos" || product.categoria === state.category;
       var marketplaceMatch = state.marketplace === "Todos" || product.marketplace === state.marketplace;
       var text = product._search || normalize([product.nome, product.marca, product.categoria, product.marketplace].join(" "));
       var searchMatch = !q || text.indexOf(q) !== -1;
-      return categoryMatch && marketplaceMatch && searchMatch;
+      var collectionMatch = true;
+
+      if (state.collection === "Ate50") {
+        var price = Number(product.preco);
+        collectionMatch = Number.isFinite(price) && price > 0 && price <= 50;
+      } else if (state.collection === "CasaInteligente") {
+        collectionMatch = isSmartHomeProduct(product);
+      }
+
+      return categoryMatch && marketplaceMatch && searchMatch && collectionMatch;
     });
+
+    if (state.collection === "Destaques") {
+      products.sort(function (a, b) {
+        var scoreA = (a.imagem ? 2 : 0) + (Number(a.preco) > 0 ? 1 : 0);
+        var scoreB = (b.imagem ? 2 : 0) + (Number(b.preco) > 0 ? 1 : 0);
+        return scoreB - scoreA;
+      });
+    }
+
+    return products;
   }
 
   function productCard(product) {
@@ -271,13 +300,21 @@
     });
 
     var title = document.getElementById("catalogTitle");
-    title.textContent = state.marketplace === "Todos" ? "Todos os produtos" : state.marketplace;
+    var collectionTitles = {
+      Destaques: "Destaques da loja",
+      Ate50: "Achadinhos até R$ 50",
+      CasaInteligente: "Casa inteligente"
+    };
+    title.textContent = collectionTitles[state.collection] ||
+      (state.marketplace === "Todos" ? "Todos os produtos" : state.marketplace);
 
     var activeCategory = document.getElementById("activeCategoryBtn");
-    activeCategory.textContent = state.category === "Todos" ? "Todas as categorias" : state.category;
+    activeCategory.textContent = collectionTitles[state.collection] ||
+      (state.category === "Todos" ? "Todas as categorias" : state.category);
 
     document.getElementById("clearFiltersBtn").hidden =
-      state.marketplace === "Todos" && state.category === "Todos" && !state.query;
+      state.marketplace === "Todos" && state.category === "Todos" &&
+      state.collection === "Todos" && !state.query;
   }
 
   function renderProducts(loadPrices) {
@@ -314,9 +351,31 @@
     }
   }
 
+  function setDiscovery(discovery) {
+    state.marketplace = "Todos";
+    state.category = "Todos";
+    state.query = "";
+    state.collection = "Todos";
+    state.visible = 16;
+    document.getElementById("searchInput").value = "";
+
+    if (discovery === "Cozinha" || discovery === "Organização" || discovery === "Iluminação") {
+      state.category = discovery;
+    } else {
+      state.collection = discovery;
+    }
+
+    renderSidebarCategories();
+    renderProducts();
+
+    var catalog = document.getElementById("achadinhos");
+    if (catalog) catalog.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function setMarketplace(marketplace) {
     state.marketplace = marketplace;
     state.category = "Todos";
+    state.collection = "Todos";
     state.visible = 16;
     renderSidebarCategories();
     renderProducts();
@@ -326,6 +385,7 @@
 
   function setCategory(category) {
     state.category = category;
+    state.collection = "Todos";
     state.visible = 16;
     renderProducts();
 
@@ -359,6 +419,30 @@
     });
   }
 
+  function updateDiscoveryCounts() {
+    var byCategory = function (category) {
+      return state.products.filter(function (p) { return p.categoria === category; }).length;
+    };
+    var under50 = state.products.filter(function (p) {
+      var price = Number(p.preco);
+      return Number.isFinite(price) && price > 0 && price <= 50;
+    }).length;
+    var smart = state.products.filter(isSmartHomeProduct).length;
+
+    var values = {
+      under50Count: under50,
+      kitchenCount: byCategory("Cozinha"),
+      organizationCount: byCategory("Organização"),
+      lightingCount: byCategory("Iluminação"),
+      smartCount: smart
+    };
+
+    Object.keys(values).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = values[id].toLocaleString("pt-BR");
+    });
+  }
+
   function updateCounts() {
     var ml = state.products.filter(function (p) { return p.marketplace === "Mercado Livre"; }).length;
     var shopee = state.products.filter(function (p) { return p.marketplace === "Shopee"; }).length;
@@ -369,9 +453,16 @@
     document.getElementById("shopeeCount").textContent = shopee;
     document.getElementById("heroProductCount").textContent = state.products.length;
     document.getElementById("heroCategoryCount").textContent = categories.size;
+    updateDiscoveryCounts();
   }
 
   function initEvents() {
+    document.querySelectorAll("[data-discovery]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        setDiscovery(button.dataset.discovery);
+      });
+    });
+
     document.querySelectorAll("[data-marketplace]").forEach(function (button) {
       button.addEventListener("click", function () {
         setMarketplace(button.dataset.marketplace);
@@ -386,6 +477,7 @@
       state.category = "Todos";
       state.marketplace = "Todos";
       state.query = "";
+      state.collection = "Todos";
       state.visible = 16;
       document.getElementById("searchInput").value = "";
       renderSidebarCategories();
