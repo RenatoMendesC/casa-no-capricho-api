@@ -432,3 +432,45 @@ body.sidebar-collapsed .secure-note{justify-content:center;padding:8px}
   .discovery-card{min-height:96px;padding:14px}
   .discovery-heading h2{font-size:26px}
 }
+
+
+/* === DISCOVERY HUB FIX 2026-09-24 === */
+.discovery-grid{
+  width:100%;
+  align-items:stretch;
+}
+.discovery-card{
+  -webkit-appearance:none;
+  appearance:none;
+  width:100%;
+  min-width:0;
+  color:var(--ink);
+  font:inherit;
+  overflow:hidden;
+}
+.discovery-card > span{
+  min-width:0;
+}
+.discovery-copy{
+  align-content:center;
+}
+.discovery-copy strong{
+  display:block;
+  line-height:1.25;
+}
+.discovery-copy small{
+  display:block;
+  line-height:1.35;
+}
+.discovery-arrow{
+  justify-self:end;
+}
+@media(max-width:600px){
+  .discovery-card{
+    grid-template-columns:42px minmax(0,1fr) auto;
+    gap:11px;
+  }
+  .discovery-copy small{
+    white-space:normal;
+  }
+}
