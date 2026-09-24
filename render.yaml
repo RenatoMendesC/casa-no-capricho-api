@@ -3,5 +3,5 @@ services:
     name: casa-no-capricho-site
     runtime: static
     branch: main
-    buildCommand: echo "Static site ready"
+    buildCommand: node scripts/build-catalog-10000.js
     staticPublishPath: public
