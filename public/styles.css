@@ -909,3 +909,340 @@ body.sidebar-open .sidebar-overlay{display:block;position:fixed;inset:0;z-index:
   .category-badge{display:none}
   .site-footer{padding:22px 14px}
 }
+
+
+/* === CASA NO CAPRICHO MODERN SOFT UI 2026-09-25 === */
+:root{
+  --bg:#f4f2ed;
+  --surface:#ffffff;
+  --surface-soft:#faf9f6;
+  --ink:#263029;
+  --muted:#747b74;
+  --line:#e8e4dc;
+  --sage:#6f8468;
+  --sage-dark:#52644d;
+  --sage-soft:#edf2e9;
+  --shadow:0 10px 30px rgba(43,56,46,.08);
+}
+
+body{
+  background:linear-gradient(180deg,#f7f5f0 0%,#f1efe9 100%);
+  color:var(--ink);
+}
+
+.topbar{
+  background:rgba(244,242,237,.92);
+  border-bottom:1px solid rgba(112,132,104,.12);
+  box-shadow:0 6px 24px rgba(43,56,46,.05);
+  backdrop-filter:blur(16px);
+}
+
+.mobile-menu-btn{
+  border:1px solid #dde5d9;
+  border-radius:14px;
+  background:#fff;
+  color:var(--sage-dark);
+  box-shadow:0 8px 20px rgba(43,56,46,.08);
+}
+
+.top-search{
+  border:1px solid #e1e6dd;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 10px 30px rgba(43,56,46,.07);
+}
+
+.top-search:focus-within{
+  border-color:#a9b9a3;
+  box-shadow:0 0 0 4px rgba(111,132,104,.11),0 12px 30px rgba(43,56,46,.09);
+}
+
+.top-cta{
+  border-radius:14px;
+  background:linear-gradient(135deg,#789071,#5b7355);
+  box-shadow:0 10px 24px rgba(82,108,77,.22);
+}
+
+.top-cta:hover{
+  background:linear-gradient(135deg,#6f8768,#52684d);
+  transform:translateY(-1px);
+  box-shadow:0 13px 28px rgba(82,108,77,.27);
+}
+
+.sidebar{
+  border-radius:0 24px 24px 0;
+  box-shadow:0 20px 50px rgba(31,42,34,.16);
+}
+
+.sidebar-head{
+  background:linear-gradient(135deg,#edf3e9,#f8f5ee);
+  border-radius:0 24px 0 0;
+}
+
+.nav-item{
+  border-radius:14px;
+}
+
+.nav-item.active{
+  background:linear-gradient(135deg,#789071,#5b7255);
+  color:#fff;
+  box-shadow:0 10px 22px rgba(82,108,77,.18);
+}
+
+.market-nav[data-marketplace="Mercado Livre"].active{
+  background:#fff5b8;
+  color:#4f4a24;
+}
+
+.market-nav[data-marketplace="Shopee"].active{
+  background:#fff0ec;
+  color:#c94a31;
+}
+
+.main-content{
+  width:min(1220px,calc(100% - 34px));
+  padding-top:34px;
+}
+
+.welcome{
+  border:1px solid rgba(111,132,104,.10);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 88% 10%,rgba(255,255,255,.9),transparent 28%),
+    linear-gradient(135deg,#edf3e9 0%,#f8f4ec 52%,#f3eee5 100%);
+  box-shadow:0 18px 46px rgba(43,56,46,.08);
+}
+
+.welcome:after{
+  background:rgba(111,132,104,.08);
+}
+
+.eyebrow,.section-kicker{
+  color:var(--sage-dark);
+}
+
+.welcome h1{
+  color:#253128;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-weight:750;
+  letter-spacing:-.045em;
+}
+
+.welcome-stats div{
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.78);
+  box-shadow:0 10px 28px rgba(43,56,46,.06);
+}
+
+.discovery-heading h2,.catalog-heading h2,.about-card h2{
+  color:#253128;
+}
+
+.discovery-card{
+  border-radius:20px!important;
+  border:1px solid #ece8df!important;
+  background:rgba(255,255,255,.94)!important;
+  box-shadow:0 10px 28px rgba(43,56,46,.06)!important;
+}
+
+.discovery-card:hover{
+  transform:translateY(-4px)!important;
+  box-shadow:0 18px 38px rgba(43,56,46,.11)!important;
+}
+
+.discovery-icon{
+  border-radius:16px!important;
+  background:var(--sage-soft)!important;
+  color:var(--sage-dark)!important;
+}
+
+.discovery-arrow{
+  color:var(--sage-dark)!important;
+}
+
+.market-tabs{
+  padding:5px;
+  border:1px solid #e7e2da;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 8px 24px rgba(43,56,46,.05);
+}
+
+.market-tab{
+  border:0;
+  border-radius:12px;
+  background:transparent;
+}
+
+.market-tab:hover{
+  background:#f5f7f3;
+}
+
+.market-tab.active,
+.market-tab[data-marketplace="Mercado Livre"].active{
+  background:linear-gradient(135deg,#789071,#5b7255);
+  color:#fff;
+  box-shadow:0 8px 18px rgba(82,108,77,.20);
+}
+
+.market-tab[data-marketplace="Shopee"].active{
+  background:linear-gradient(135deg,#ff6f4c,#e94a2b);
+  box-shadow:0 8px 18px rgba(238,77,45,.20);
+}
+
+.active-category,.clear-filters{
+  border:1px solid #e6e1d8;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(43,56,46,.05);
+}
+
+.active-category{
+  color:var(--sage-dark);
+  background:var(--sage-soft);
+  border-color:#dae5d5;
+}
+
+.product-grid{
+  gap:18px;
+}
+
+.product-card{
+  border:1px solid #eae6de;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 10px 28px rgba(43,56,46,.06);
+  overflow:hidden;
+}
+
+.product-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 20px 42px rgba(43,56,46,.12);
+  border-color:#dbe4d7;
+}
+
+.product-media{
+  background:linear-gradient(180deg,#fff 0%,#fcfbf8 100%);
+  border-bottom:1px solid #f0ece5;
+  border-radius:22px 22px 0 0;
+}
+
+.product-media img{
+  padding:16px;
+}
+
+.market-badge,.category-badge{
+  border-radius:999px;
+  box-shadow:0 6px 14px rgba(37,49,40,.10);
+}
+
+.category-badge{
+  background:rgba(45,58,49,.88);
+}
+
+.product-body{
+  padding:17px 17px 18px;
+}
+
+.product-brand{
+  color:#70806b;
+}
+
+.product-title{
+  color:#273128;
+  font-weight:650;
+  line-height:1.42;
+}
+
+.product-price{
+  color:#243329;
+  font-weight:600;
+  letter-spacing:-.03em;
+}
+
+.product-sales{
+  background:#eef4eb;
+  color:#61725d;
+  border-radius:999px;
+}
+
+.product-meta{
+  border-top:1px solid #efeae2;
+}
+
+.product-link{
+  border-radius:13px;
+  background:linear-gradient(135deg,#789071,#536c4d);
+  box-shadow:0 9px 18px rgba(82,108,77,.18);
+}
+
+.product-link:hover{
+  background:linear-gradient(135deg,#6d8566,#4d6348);
+  transform:translateY(-1px);
+  box-shadow:0 12px 22px rgba(82,108,77,.24);
+}
+
+.product-link.shopee-link{
+  background:linear-gradient(135deg,#ff704a,#e94727);
+}
+
+.load-more{
+  border-radius:14px;
+  background:#fff;
+  color:var(--sage-dark);
+  border:1px solid #dfe7dc;
+  box-shadow:0 8px 20px rgba(43,56,46,.06);
+}
+
+.load-more:hover{
+  background:var(--sage-soft);
+}
+
+.about-card{
+  border:1px solid #e9e4dc;
+  border-radius:24px;
+  box-shadow:0 14px 34px rgba(43,56,46,.07);
+}
+
+.empty-state{
+  border-radius:22px;
+  box-shadow:0 12px 30px rgba(43,56,46,.05);
+}
+
+.site-footer{
+  background:rgba(255,255,255,.85);
+  border-top:1px solid #e7e2da;
+}
+
+@media(max-width:900px){
+  .topbar{
+    background:rgba(244,242,237,.96);
+  }
+}
+
+@media(max-width:560px){
+  .top-search{
+    border-radius:15px;
+  }
+
+  .welcome{
+    border-radius:22px;
+  }
+
+  .product-grid{
+    gap:10px;
+  }
+
+  .product-card{
+    border-radius:18px;
+  }
+
+  .product-media{
+    border-radius:18px 18px 0 0;
+  }
+
+  .product-link{
+    border-radius:12px;
+  }
+}
