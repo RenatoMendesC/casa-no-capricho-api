@@ -717,3 +717,195 @@ body.sidebar-collapsed .secure-note{justify-content:center;padding:8px}
     font-size:22px;
   }
 }
+
+
+/* === MARKETPLACE REFRESH 2026-09-25 === */
+:root{
+  --bg:#ebebeb;
+  --surface:#ffffff;
+  --surface-soft:#f5f5f5;
+  --ink:#333333;
+  --muted:#777777;
+  --line:#e6e6e6;
+  --sage:#3483fa;
+  --sage-dark:#2968c8;
+  --sage-soft:#eaf3ff;
+  --ml:#ffe600;
+  --shadow:0 1px 2px rgba(0,0,0,.10);
+}
+
+body{background:#ebebeb;color:#333;font-family:Arial,Helvetica,sans-serif}
+.app-shell{min-height:100vh}
+.sidebar{
+  width:300px;transform:translateX(-100%);box-shadow:0 8px 32px rgba(0,0,0,.18);
+  border-right:0;z-index:100;background:#fff
+}
+body.sidebar-open .sidebar{transform:translateX(0)}
+.sidebar-head{height:72px;background:#ffe600;border-bottom:1px solid rgba(0,0,0,.08)}
+.sidebar-bottom{background:#fafafa}
+.collapse-btn{display:none!important}
+.sidebar-overlay{display:none}
+body.sidebar-open .sidebar-overlay{display:block;position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.42)}
+
+.page,body.sidebar-collapsed .page{margin-left:0}
+.topbar{
+  position:sticky;top:0;z-index:70;height:auto;min-height:92px;
+  display:grid;grid-template-columns:auto minmax(320px,620px) auto;
+  align-items:center;justify-content:center;gap:22px;
+  padding:14px max(24px,calc((100vw - 1200px)/2));
+  background:#ffe600;border-bottom:0;box-shadow:0 1px 0 rgba(0,0,0,.08);
+  backdrop-filter:none
+}
+.mobile-menu-btn{
+  display:grid;width:42px;height:42px;border:0;border-radius:50%;
+  background:rgba(255,255,255,.65);box-shadow:none;color:#333;font-size:21px
+}
+.top-search{
+  height:46px;max-width:none;margin:0;padding:0 16px;
+  border:0;border-radius:2px;background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.20)
+}
+.top-search:focus-within{border:0;box-shadow:0 1px 4px rgba(0,0,0,.28)}
+.top-search>span{font-size:20px;color:#666;order:2}
+.top-search input{font-size:16px;color:#333}
+.top-search input::placeholder{color:#999}
+.top-search kbd{display:none}
+.top-cta{
+  padding:11px 18px;border-radius:6px;background:#3483fa;color:#fff;
+  box-shadow:none;font-size:13px;font-weight:700
+}
+.top-cta:hover{background:#2968c8;transform:none;box-shadow:none}
+
+.main-content{width:min(1200px,calc(100% - 32px));padding:32px 0 48px}
+.welcome{
+  min-height:250px;align-items:center;padding:40px 46px;border:0;border-radius:8px;
+  background:linear-gradient(110deg,#fff6b8 0%,#fff 56%,#eaf3ff 100%);
+  box-shadow:var(--shadow)
+}
+.welcome:after{width:360px;height:360px;right:-100px;top:-120px;background:rgba(255,230,0,.18)}
+.eyebrow,.section-kicker{color:#3483fa;font-family:Arial,Helvetica,sans-serif;letter-spacing:.04em}
+.welcome h1{
+  max-width:680px;margin:10px 0 12px;font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(34px,4vw,50px);font-weight:700;line-height:1.05;letter-spacing:-.03em;color:#333
+}
+.welcome p{max-width:620px;color:#666;font-size:16px}
+.welcome-stats{gap:8px}
+.welcome-stats div{
+  min-width:110px;padding:17px;border:1px solid #eee;border-radius:6px;
+  background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);backdrop-filter:none
+}
+.welcome-stats strong{font-family:Arial,Helvetica,sans-serif;font-size:24px;color:#333}
+.welcome-stats span{font-size:10px;color:#777}
+
+.discovery-section{padding-top:34px}
+.discovery-heading h2,.catalog-heading h2,.about-card h2{
+  font-family:Arial,Helvetica,sans-serif;font-weight:600;letter-spacing:-.02em;color:#333
+}
+.discovery-heading h2{font-size:26px}
+.discovery-grid{gap:12px}
+.discovery-card{
+  border:0!important;border-radius:8px!important;background:#fff!important;
+  box-shadow:var(--shadow)!important;transition:box-shadow .2s ease,transform .2s ease!important
+}
+.discovery-card:hover{transform:translateY(-2px)!important;box-shadow:0 4px 14px rgba(0,0,0,.12)!important}
+.discovery-featured{background:#fff!important}
+.discovery-icon{background:#eaf3ff!important;color:#3483fa!important}
+.discovery-arrow{color:#3483fa!important}
+
+.catalog-section{padding-top:38px}
+.catalog-heading{margin-bottom:16px}
+.catalog-heading h2{font-size:28px}
+.market-tabs{padding:0;border:0;border-radius:6px;background:transparent;box-shadow:none;gap:8px}
+.market-tab{
+  border:1px solid #ddd;background:#fff;border-radius:6px;padding:10px 14px;
+  color:#555;box-shadow:none
+}
+.market-tab:hover{transform:none;background:#f7f7f7}
+.market-tab.active,.market-tab[data-marketplace="Mercado Livre"].active{
+  background:#3483fa;color:#fff;border-color:#3483fa;box-shadow:none
+}
+.market-tab[data-marketplace="Shopee"].active{background:#ee4d2d;border-color:#ee4d2d;box-shadow:none}
+.active-category,.clear-filters{
+  border:0;border-radius:6px;background:#fff;box-shadow:var(--shadow);padding:8px 12px
+}
+.active-category{color:#3483fa}
+.clear-filters{color:#666;background:#fff}
+
+.product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.product-card{
+  border:0;border-radius:6px;background:#fff;box-shadow:var(--shadow);
+  transition:box-shadow .2s ease,transform .2s ease;overflow:hidden
+}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(0,0,0,.14)}
+.product-media{aspect-ratio:1/1;background:#fff;border-bottom:1px solid #eee}
+.product-media img{padding:18px}
+.product-card:hover .product-media img{transform:none}
+.market-badge,.category-badge{
+  top:10px;border-radius:4px;box-shadow:none;font-size:9px
+}
+.market-badge.market-ml{background:#ffe600;color:#333}
+.category-badge{background:rgba(51,51,51,.82);color:#fff}
+.product-body{padding:16px 16px 18px}
+.product-brand{color:#888;font-size:10px}
+.product-title{
+  margin:6px 0 12px;min-height:40px;font-size:14px;line-height:1.35;font-weight:400;color:#333
+}
+.product-price{font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:400;color:#333}
+.product-sales{background:#eaf7ee;color:#00a650}
+.product-meta{margin-top:8px;padding-top:12px;border-top:1px solid #eee}
+.product-code{color:#aaa}
+.product-link{
+  min-width:94px;padding:9px 12px;border-radius:6px;background:#3483fa;
+  color:#fff;box-shadow:none;font-weight:700
+}
+.product-link:hover{transform:none;background:#2968c8;box-shadow:none}
+.product-link.shopee-link{background:#ee4d2d;box-shadow:none}
+.product-link.shopee-link:hover{background:#d83f23;box-shadow:none}
+.load-more{
+  border:0;border-radius:6px;background:#eaf3ff;color:#3483fa;box-shadow:none;padding:12px 24px
+}
+.load-more:hover{transform:none;background:#dcecff;box-shadow:none}
+
+.about-card{
+  margin-top:42px;border:0;border-radius:8px;background:#fff;box-shadow:var(--shadow)
+}
+.site-footer{
+  background:#fff;border-top:1px solid #ddd;margin-top:20px;padding:26px max(24px,calc((100vw - 1200px)/2))
+}
+.empty-state{background:#fff;border:0;border-radius:8px;box-shadow:var(--shadow)}
+
+.nav-item.active{
+  background:#eaf3ff;color:#3483fa;border-color:transparent;box-shadow:none
+}
+.nav-item:hover{transform:none;background:#f5f5f5;border-color:transparent;box-shadow:none}
+.market-nav[data-marketplace="Mercado Livre"].active{background:#fff9c4;color:#333;border-color:transparent;box-shadow:none}
+.market-nav[data-marketplace="Shopee"].active{background:#fff0ed;color:#d84228;border-color:transparent;box-shadow:none}
+
+@media(max-width:900px){
+  .topbar{grid-template-columns:auto 1fr;padding:12px 14px;gap:10px}
+  .top-cta{display:none}
+  .main-content{width:min(100% - 22px,1200px);padding-top:18px}
+  .welcome{padding:28px 24px}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .topbar{min-height:70px}
+  .top-search{height:44px}
+  .welcome{min-height:0;padding:24px 20px}
+  .welcome h1{font-size:31px}
+  .welcome-stats{grid-template-columns:repeat(3,1fr)}
+  .welcome-stats div{display:grid;padding:12px 10px;text-align:center}
+  .welcome-stats strong{font-size:20px}
+  .catalog-heading h2{font-size:25px}
+  .market-tabs{display:grid;grid-template-columns:repeat(3,1fr)}
+  .market-tab{padding:9px 7px;font-size:11px}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .product-body{padding:12px}
+  .product-media img{padding:10px}
+  .product-title{font-size:13px;min-height:36px}
+  .product-price{font-size:20px}
+  .product-meta{display:block}
+  .product-link{display:block;margin-top:10px;text-align:center}
+  .category-badge{display:none}
+  .site-footer{padding:22px 14px}
+}
