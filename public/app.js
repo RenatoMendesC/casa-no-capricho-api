@@ -176,8 +176,10 @@
     article.setAttribute("aria-label", "Abrir oferta: " + cleanTitle(product.nome));
 
     function abrirOferta() {
-      var opened = window.open(product.affiliateUrl, "_blank", "noopener");
-      if (!opened) window.location.href = product.affiliateUrl;
+      var destination = product.affiliateUrl || product.productUrl || product.catalogUrl;
+      if (!destination) return;
+      var opened = window.open(destination, "_blank", "noopener");
+      if (!opened) window.location.href = destination;
     }
 
     article.addEventListener("click", function (event) {
@@ -270,10 +272,10 @@
 
     var link = document.createElement("a");
     link.className = "product-link" + (marketplace === "Shopee" ? " shopee-link" : "");
-    link.href = product.affiliateUrl;
+    link.href = product.affiliateUrl || product.productUrl || product.catalogUrl || "#";
     link.target = "_blank";
-    link.rel = "noopener sponsored";
-    link.textContent = "Ver oferta";
+    link.rel = product.affiliateUrl ? "noopener sponsored" : "noopener";
+    link.textContent = product.affiliateUrl ? "Ver oferta" : "Ver na Shopee";
     link.addEventListener("click", function (event) {
       event.stopPropagation();
     });
@@ -536,7 +538,9 @@
     return "/data/shopee10k/shard-" + String(index + 1).padStart(2, "0") + ".json";
   });
 
-  function mapShopeeCompact(compact) {
+  var shopeeAffiliateMapUrl = "/data/shopee-affiliate-map.json";
+
+  function mapShopeeCompact(compact, affiliateLinks) {
     var categories = Array.isArray(compact.c) ? compact.c : [];
     var items = Array.isArray(compact.p) ? compact.p : [];
 
@@ -556,7 +560,8 @@
         imagem: imageUrl,
         categoria: categories[item[4]] || "Utilidades",
         marketplace: "Shopee",
-        affiliateUrl: "https://shope.ee/an_redir?origin_link=" + encodeURIComponent(productUrl),
+        affiliateUrl: affiliateLinks && affiliateLinks[itemId] ? affiliateLinks[itemId] : null,
+        affiliateStatus: affiliateLinks && affiliateLinks[itemId] ? "approved" : "pending",
         productUrl: productUrl,
         preco: Number(item[5]),
         moeda: "BRL"
@@ -581,23 +586,32 @@
         if (!response.ok) throw new Error("Falha ao carregar catálogo Shopee 10k");
         return response.json();
       });
-    }))
+    })),
+    fetch(shopeeAffiliateMapUrl, { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) return { links: {} };
+        return response.json();
+      })
+      .catch(function () { return { links: {} }; })
   ])
     .then(function (catalogs) {
       var ml = Array.isArray(catalogs[0].produtos) ? catalogs[0].produtos : [];
       var shopeeBase = catalogs[1].reduce(function (all, shard) {
         return all.concat(Array.isArray(shard.produtos) ? shard.produtos : []);
       }, []);
+      var affiliateMap = catalogs[3] && catalogs[3].links ? catalogs[3].links : {};
       var shopeeCatalog = Array.isArray(catalogs[2])
         ? catalogs[2].reduce(function (all, compactShard) {
-            return all.concat(mapShopeeCompact(compactShard));
+            return all.concat(mapShopeeCompact(compactShard, affiliateMap));
           }, [])
         : [];
       var shopee = shopeeBase.concat(shopeeCatalog);
       var seen = new Set();
 
       state.products = ml.concat(shopee)
-        .filter(function (product) { return Boolean(product.affiliateUrl); })
+        .filter(function (product) {
+          return Boolean(product.affiliateUrl || product.productUrl || product.catalogUrl);
+        })
         .filter(function (product) {
           var key = (product.marketplace || "Mercado Livre") + ":" + product.id;
           if (seen.has(key)) return false;
