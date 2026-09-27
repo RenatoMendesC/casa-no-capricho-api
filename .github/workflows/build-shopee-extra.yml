@@ -1,8 +1,6 @@
 name: Build Shopee Extra Catalog
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -48,9 +46,9 @@ jobs:
                   "imagens": [image_url],
                   "categoria": categories[item[4]] if item[4] < len(categories) else "Utilidades",
                   "marketplace": "Shopee",
-                  "affiliateUrl": "https://shope.ee/an_redir?origin_link=" + __import__("urllib.parse").parse.quote(product_url, safe=""),
+                  "affiliateUrl": None,
                   "productUrl": product_url,
-                  "affiliateStatus": "approved",
+                  "affiliateStatus": "pending",
                   "preco": float(item[5]),
                   "moeda": "BRL",
                   "origemSelecao": "SHOPEE_DATAFEED_OFICIAL_EXTRA"
