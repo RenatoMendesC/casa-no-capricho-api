@@ -2,6 +2,10 @@ name: Sync Shopee Affiliate Links
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/shopee-sync-trigger"
 
 permissions:
   contents: write
